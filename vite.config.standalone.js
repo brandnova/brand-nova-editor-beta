@@ -2,6 +2,7 @@ import { defineConfig } from "vite"
 import react from "@vitejs/plugin-react"
 
 export default defineConfig({
+  base: "./",  // ✅ important for GitHub Pages
   plugins: [react()],
   build: {
     lib: {
@@ -9,12 +10,6 @@ export default defineConfig({
       name: "BrandNovaEditor",
       fileName: (format) => `brand-nova-editor.${format}.js`,
       formats: ["umd"],
-    },
-    rollupOptions: {
-      external: [],
-      output: {
-        globals: {},
-      },
     },
     outDir: "dist-standalone",
     emptyOutDir: true,
