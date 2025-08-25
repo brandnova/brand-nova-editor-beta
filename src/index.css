@@ -1,0 +1,217 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Enhanced styles for Brand Nova Editor */
+
+/* Base editor styles */
+.brand-nova-editor {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", sans-serif;
+}
+
+/* Accessibility improvements */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus styles for better accessibility */
+.brand-nova-editor *:focus {
+  outline: 2px solid #f59e0b;
+  outline-offset: 2px;
+}
+
+.brand-nova-editor button:focus {
+  outline: 2px solid #f59e0b;
+  outline-offset: 2px;
+  z-index: 10;
+}
+
+/* Toolbar enhancements */
+.toolbar {
+  position: relative;
+  z-index: 30;
+}
+
+.toolbar.sticky-active {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Dark theme toolbar when sticky */
+.brand-nova-editor.dark .toolbar.sticky-active {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+}
+
+/* Smooth transitions for toolbar */
+.toolbar {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Button hover and active states */
+.toolbar button {
+  position: relative;
+  transition: all 0.15s ease-in-out;
+  border: 1px solid transparent;
+}
+
+.toolbar button:hover {
+  transform: translateY(-1px);
+}
+
+.toolbar button:active {
+  transform: translateY(0);
+}
+
+/* Enhanced button active states */
+.toolbar button[aria-pressed="true"] {
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+  position: relative;
+}
+
+.toolbar button[aria-pressed="true"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.1));
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Group separators */
+.toolbar [role="separator"] {
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+.brand-nova-editor.dark .toolbar [role="separator"] {
+  opacity: 0.3;
+}
+
+/* Editor content enhancements */
+.editor-content {
+  position: relative;
+}
+
+/* Prosemirror-like focus ring for content area */
+.editor-content [contenteditable]:focus {
+  outline: none;
+}
+
+/* Word count accessibility */
+[aria-live="polite"] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Loading states */
+.toolbar button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  transform: none !important;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .brand-nova-editor {
+    --toolbar-border: 2px solid;
+    --button-border: 1px solid;
+  }
+
+  .toolbar {
+    border-width: 2px;
+  }
+
+  .toolbar button {
+    border-width: 1px;
+    border-style: solid;
+  }
+
+  .toolbar button[aria-pressed="true"] {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .brand-nova-editor *,
+  .brand-nova-editor *::before,
+  .brand-nova-editor *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .toolbar button:hover {
+    transform: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .toolbar,
+  .editor-header {
+    display: none !important;
+  }
+
+  .editor-content {
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .brand-nova-editor {
+    background: white !important;
+    color: black !important;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .toolbar {
+    padding: 0.75rem 1rem;
+  }
+
+  .toolbar > div {
+    gap: 0.25rem;
+  }
+
+  .toolbar button {
+    padding: 0.5rem;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+  }
+
+  /* Stack toolbar groups on very small screens */
+  @media (max-width: 480px) {
+    .toolbar > div {
+      flex-wrap: wrap;
+    }
+
+    .toolbar [role="group"] {
+      margin-bottom: 0.5rem;
+    }
+
+    .toolbar [role="separator"] {
+      display: none;
+    }
+  }
+}
+
+/* Enhanced tooltip styles */
+.logo-container [role="tooltip"] {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
