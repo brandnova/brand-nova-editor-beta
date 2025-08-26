@@ -4,168 +4,193 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brand Nova Editor - Demo</title>
-    <link rel="stylesheet" href="./brand-nova-editor.css">
+    <link rel="stylesheet" href="brand-nova-editor.css">
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-        }
-    </style>
 </head>
 <body class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-    <div class="container mx-auto p-6 max-w-5xl">
-        <!-- Header -->
-        <div class="text-center mb-8">
+    <div class="container mx-auto p-4 max-w-6xl">
+        <div class="text-center mb-6">
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Brand Nova Editor</h1>
-            <p class="text-gray-600 dark:text-gray-400">Rich Text Editor Demo</p>
+            <p class="text-gray-600 dark:text-gray-400">Interactive Demo</p>
         </div>
 
-        <!-- Controls -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">
-            <div class="flex flex-wrap items-center justify-between gap-4">
-                <div class="flex items-center gap-4">
-                    <div class="flex items-center gap-2">
-                        <label for="theme-select" class="text-sm font-medium text-gray-700 dark:text-gray-300">Theme:</label>
-                        <select id="theme-select" class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Config</h3>
+                
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Theme</label>
+                        <select id="theme" class="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
                             <option value="light">Light</option>
                             <option value="dark">Dark</option>
                         </select>
                     </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Max Height (px) 0 - 1000</label>
+                        <input id="maxHeight" type="number" value="0" min="200" max="800" class="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+                    </div>
+
+                    <div>
+                        <label class="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <input id="showWordCount" type="checkbox" checked class="mr-2">
+                            Show Word Count
+                        </label>
+                    </div>
+
+                    <div>
+                        <label class="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <input id="stickyToolbar" type="checkbox" checked class="mr-2">
+                            Sticky Toolbar
+                        </label>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Placeholder</label>
+                        <input id="placeholder" type="text" value="Start writing..." class="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+                    </div>
+
+                    <button onclick="applyConfig()" class="w-full px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition-colors">
+                        Apply Config
+                    </button>
                 </div>
-                
+            </div>
+
+            <div class="lg:col-span-3">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div id="brand-nova-editor"></div>
+                </div>
             </div>
         </div>
 
-        <!-- Editor -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div id="brand-nova-editor"></div>
-        </div>
-
-        <!-- Status -->
         <div id="status" class="mt-4 p-3 rounded-md hidden"></div>
     </div>
 
-    <script src="./brand-nova-editor.umd.js"></script>
+    <script src="brand-nova-editor.umd.js"></script>
     <script>
         let editorInstance = null;
-        let currentTheme = 'light';
+
+        const sampleContent = [
+            { type: 'heading-one', children: [{ text: 'Brand Nova Editor Documentation' }] },
+            { type: 'paragraph', children: [{ text: 'Welcome to the Brand Nova Editor, a custom rich text editor built with Slate.js and React. This editor provides a set of formatting tools and features for content creation and formatting.' }] },
+            
+            { type: 'heading-two', children: [{ text: 'Text Formatting Features' }] },
+            { type: 'paragraph', children: [
+                { text: 'The editor supports various text formatting options including ' },
+                { text: 'bold text', bold: true },
+                { text: ', ' },
+                { text: 'italic text', italic: true },
+                { text: ', ' },
+                { text: 'underlined text', underline: true },
+                { text: ', ' },
+                { text: 'strikethrough text', strikethrough: true },
+                { text: ', and ' },
+                { text: 'inline code', code: true },
+                { text: '.' }
+            ] },
+
+            { type: 'heading-two', children: [{ text: 'Heading Hierarchy' }] },
+            { type: 'paragraph', children: [{ text: 'The editor supports multiple heading levels for organizing content structure:' }] },
+            { type: 'heading-one', children: [{ text: 'This is Heading 1' }] },
+            { type: 'heading-two', children: [{ text: 'This is Heading 2' }] },
+            { type: 'heading-three', children: [{ text: 'This is Heading 3' }] },
+
+            { type: 'heading-two', children: [{ text: 'Lists and Organization' }] },
+            { type: 'paragraph', children: [{ text: 'Create structured content with bullet points:' }] },
+            { type: 'bulleted-list', children: [
+                { type: 'list-item', children: [{ text: 'First bullet point with important information' }] },
+                { type: 'list-item', children: [{ text: 'Second bullet point explaining features' }] },
+                { type: 'list-item', children: [{ text: 'Third bullet point with additional details' }] },
+                { type: 'list-item', children: [{ text: 'Fourth bullet point for comprehensive coverage' }] }
+            ] },
+
+            { type: 'paragraph', children: [{ text: 'Or use numbered lists for sequential content:' }] },
+            { type: 'numbered-list', children: [
+                { type: 'list-item', children: [{ text: 'Step one in the process' }] },
+                { type: 'list-item', children: [{ text: 'Step two with detailed instructions' }] },
+                { type: 'list-item', children: [{ text: 'Step three to complete the workflow' }] },
+                { type: 'list-item', children: [{ text: 'Final step for successful implementation' }] }
+            ] },
+
+            { type: 'heading-two', children: [{ text: 'Block Quotes and Special Content' }] },
+            { type: 'block-quote', children: [{ text: 'This is a block quote that can be used to highlight important information, quotes from other sources, or to create visual emphasis in your content.' }] },
+
+            { type: 'paragraph', children: [{ text: 'The editor also supports horizontal rules for content separation:' }] },
+            { type: 'horizontal-rule', children: [{ text: '' }] },
+
+            { type: 'heading-two', children: [{ text: 'Text Alignment Options' }] },
+            { type: 'paragraph', align: 'left', children: [{ text: 'This paragraph is left-aligned (default alignment).' }] },
+            { type: 'paragraph', align: 'center', children: [{ text: 'This paragraph is center-aligned for emphasis.' }] },
+            { type: 'paragraph', align: 'right', children: [{ text: 'This paragraph is right-aligned.' }] },
+            { type: 'paragraph', align: 'justify', children: [{ text: 'This paragraph uses justified alignment, which spreads the text evenly across the full width of the container, creating clean edges on both sides.' }] },
+
+            { type: 'heading-two', children: [{ text: 'Advanced Features' }] },
+            { type: 'paragraph', children: [{ text: 'The Brand Nova Editor includes several advanced features:' }] },
+            { type: 'bulleted-list', children: [
+                { type: 'list-item', children: [{ text: 'Markdown paste support - paste Markdown content and it will be automatically converted' }] },
+                { type: 'list-item', children: [{ text: 'Keyboard shortcuts for common formatting (Ctrl+B for bold, Ctrl+I for italic, etc.)' }] },
+                { type: 'list-item', children: [{ text: 'Dark and light theme support with seamless switching' }] },
+                { type: 'list-item', children: [{ text: 'Word and character count display' }] },
+                { type: 'list-item', children: [{ text: 'Sticky toolbar option for long documents' }] },
+                { type: 'list-item', children: [{ text: 'Configurable maximum height with scrolling' }] },
+                { type: 'list-item', children: [{ text: 'Auto-save functionality' }] }
+            ] },
+
+            { type: 'heading-two', children: [{ text: 'Getting Started' }] },
+            { type: 'paragraph', children: [{ text: 'To start using the editor, simply click in the content area and begin typing. Use the toolbar above to format your text, or use keyboard shortcuts for quick formatting. The editor supports both mouse and keyboard navigation for accessibility.' }] },
+
+            { type: 'paragraph', children: [{ text: 'This demo allows you to test various configuration options in the left panel. Try adjusting the max height, toggling features, and switching themes to see how the editor behaves under different conditions.' }] },
+
+            { type: 'paragraph', children: [{ text: 'Happy writing!' }] }
+        ];
 
         function initEditor() {
             if (editorInstance) {
                 editorInstance.destroy();
             }
 
-            editorInstance = window.BrandNovaEditor.init({
+            const config = {
                 elementId: 'brand-nova-editor',
-                theme: currentTheme,
-                placeholder: 'Start writing your content...',
-                showWordCount: true,
-                stickyToolbar: true,
-                maxHeight: null,
-                initialValue: [
-                    {
-                        type: 'heading-one',
-                        children: [{ text: 'Welcome to Brand Nova Editor' }]
-                    },
-                    {
-                        type: 'paragraph',
-                        children: [{ text: 'This rich text editor supports ' }, { text: 'bold', bold: true }, { text: ', ' }, { text: 'italic', italic: true }, { text: ', and ' }, { text: 'underlined', underline: true }, { text: ' text, along with headings, lists, and more.' }]
-                    },
-                    {
-                        type: 'heading-two',
-                        children: [{ text: 'Try these features:' }]
-                    },
-                    {
-                        type: 'bulleted-list',
-                        children: [
-                            { type: 'list-item', children: [{ text: 'Text formatting (bold, italic, underline)' }] },
-                            { type: 'list-item', children: [{ text: 'Multiple heading levels' }] },
-                            { type: 'list-item', children: [{ text: 'Bullet and numbered lists' }] },
-                            { type: 'list-item', children: [{ text: 'Block quotes and code blocks' }] },
-                            { type: 'list-item', children: [{ text: 'Text alignment options' }] }
-                        ]
-                    },
-                    {
-                        type: 'paragraph',
-                        children: [{ text: '' }]
-                    }
-                ],
-                onChange: function(value) {
-                    localStorage.setItem('brand-nova-content', JSON.stringify(value));
-                }
-            });
+                theme: document.getElementById('theme').value,
+                maxHeight: parseInt(document.getElementById('maxHeight').value) || null,
+                showWordCount: document.getElementById('showWordCount').checked,
+                stickyToolbar: document.getElementById('stickyToolbar').checked,
+                placeholder: document.getElementById('placeholder').value,
+                initialValue: sampleContent,
+                onChange: (value) => localStorage.setItem('brand-nova-content', JSON.stringify(value))
+            };
+
+            editorInstance = window.BrandNovaEditor.init(config);
         }
 
-        function updateTheme() {
-            document.documentElement.classList.toggle('dark', currentTheme === 'dark');
+        function applyConfig() {
+            document.documentElement.classList.toggle('dark', document.getElementById('theme').value === 'dark');
             initEditor();
-        }
-
-        function clearEditor() {
-            if (editorInstance) {
-                editorInstance.setValue([{ type: 'paragraph', children: [{ text: '' }] }]);
-                showStatus('Editor cleared', 'success');
-            }
-        }
-
-        function getContent() {
-            if (editorInstance) {
-                const content = editorInstance.getValue();
-                console.log('Current content:', content);
-                showStatus('Content logged to console', 'info');
-            }
-        }
-
-        function saveContent() {
-            if (editorInstance) {
-                const content = editorInstance.getValue();
-                localStorage.setItem('brand-nova-saved', JSON.stringify({
-                    content: content,
-                    timestamp: new Date().toISOString()
-                }));
-                showStatus('Content saved successfully!', 'success');
-            }
+            showStatus('Configuration applied', 'info');
         }
 
         function showStatus(message, type) {
             const status = document.getElementById('status');
             status.textContent = message;
-            status.className = `mt-4 p-3 rounded-md ${
-                type === 'success' 
-                    ? 'bg-green-50 text-green-800 border border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800' 
-                    : 'bg-blue-50 text-blue-800 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800'
-            }`;
+            status.className = `mt-4 p-3 rounded-md ${type === 'success' ? 'bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-400' : 'bg-blue-50 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'}`;
             status.classList.remove('hidden');
-            
             setTimeout(() => status.classList.add('hidden'), 3000);
         }
 
-        // Theme selector handler
-        document.getElementById('theme-select').addEventListener('change', function(e) {
-            currentTheme = e.target.value;
-            updateTheme();
-            showStatus(`Theme changed to ${currentTheme}`, 'info');
-        });
+        document.getElementById('theme').addEventListener('change', applyConfig);
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            updateTheme();
+        document.addEventListener('DOMContentLoaded', () => {
             initEditor();
-            
-            // Load saved content
             const saved = localStorage.getItem('brand-nova-content');
             if (saved) {
                 try {
-                    const content = JSON.parse(saved);
-                    setTimeout(() => editorInstance.setValue(content), 100);
-                } catch (e) {
-                    console.warn('Could not load saved content');
-                }
+                    setTimeout(() => editorInstance.setValue(JSON.parse(saved)), 100);
+                } catch (e) { console.warn('Could not load saved content'); }
             }
         });
 
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
                 saveContent();
