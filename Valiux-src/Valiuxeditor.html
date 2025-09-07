@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrandNovaEditor - Enhanced Features Demo</title>
+    <!-- Include your built CSS and JS files -->
+    <link rel="stylesheet" href="./brand-nova-editor-beta.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .header p {
+            margin: 0;
+            color: #666;
+            font-size: 16px;
+        }
+        .controls {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        .control-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .control-row:last-child {
+            margin-bottom: 0;
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .control-group label {
+            font-weight: 500;
+            min-width: 100px;
+            flex-shrink: 0;
+        }
+        .control-group input, .control-group select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            flex: 1;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 8px 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background: #6c757d;
+        }
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        .btn-success {
+            background: #28a745;
+        }
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+        .demo-section {
+            margin-bottom: 40px;
+        }
+        .demo-section h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            border-left: 4px solid #007bff;
+            padding-left: 15px;
+            font-size: 18px;
+        }
+        .feature-showcase {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            margin-bottom: 20px;
+        }
+        .feature-showcase h4 {
+            margin: 0 5px 10px 0;
+            color: #28a745;
+        }
+        .feature-showcase p {
+            margin: 0 0 10px 0;
+            color: #666;
+        }
+        .output-section {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        .editor-container {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>BrandNovaEditor - Enhanced Features Demo</h1>
+            <p>Experience advanced markdown parsing, table support, and enhanced tooltips</p>
+        </div>
+        
+        <div class="demo-section">
+            <h3>🎯 Dynamic Configuration Controls</h3>
+            <div class="controls">
+                <div class="control-row">
+                    <div class="control-group">
+                        <label>Theme:</label>
+                        <select id="themeSelect">
+                            <option value="light">Light Theme</option>
+                            <option value="dark">Dark Theme</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Max Height:</label>
+                        <input type="number" id="maxHeightInput" placeholder="e.g., 400" min="100" max="800" step="50">
+                    </div>
+                </div>
+                
+                <div class="control-row">
+                    <div class="control-group">
+                        <label>Placeholder:</label>
+                        <input type="text" id="placeholderInput" value="Start writing your content...">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Custom Class:</label>
+                        <input type="text" id="classNameInput" placeholder="e.g., custom-editor">
+                    </div>
+                </div>
+                
+                <div class="control-row">
+                    <div class="control-group">
+                        <label>Word Count:</label>
+                        <input type="checkbox" id="showWordCountCheck" checked>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Sticky Toolbar:</label>
+                        <input type="checkbox" id="stickyToolbarCheck" checked>
+                    </div>
+                </div>
+                
+                <div class="control-row">
+                    <div class="button-group">
+                        <button class="btn" onclick="updateEditor()">Update Editor</button>
+                        <button class="btn btn-success" onclick="getEditorContent()">Get HTML Content</button>
+                        <button class="btn btn-secondary" onclick="resetEditor()">Reset All</button>
+                        <button class="btn btn-secondary" onclick="clearMaxHeight()">Clear Height</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h3>✨ Features Showcase</h3>
+            
+            <div class="feature-showcase">
+                <h4>🎨 Enhanced Tooltips with Keyboard Shortcuts</h4>
+                <p>Hover over any toolbar button to see tooltips with keyboard shortcuts. Try hovering over Bold, Italic, Undo, or Fullscreen buttons!</p>
+                <h4>📝 Advanced Markdown Parsing</h4>
+                <p>Copy and paste markdown into the editor to test the enhanced parsing capabilities.</p>
+                <h4>📊 Table Support</h4>
+                <p>Tables are automatically parsed from markdown format with proper header detection and responsive layout.</p>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h3>📝 Primary Editor Instance</h3>
+            <div class="editor-container">
+                <div 
+                    id="editor1" 
+                    data-brand-nova-editor
+                    data-theme="light"
+                    data-placeholder="Try pasting the markdown examples above, or use the toolbar with enhanced tooltips..."
+                    data-show-word-count="true"
+                    data-sticky-toolbar="true"
+                ></div>
+            </div>
+        </div>
+
+        <div class="output-section" id="output"></div>
+    </div>
+
+    <!-- Include your built JavaScript file -->
+    <script src="./brand-nova-editor.umd.js"></script>
+    
+    <script>
+        // Manual initialization example
+        // const manualEditor = window.BrandNovaEditor.init({
+        //     elementId: 'manual-editor',
+        //     theme: 'dark',
+        //     placeholder: 'Manually initialized editor...',
+        //     showWordCount: true,
+        //     maxHeight: 300,
+        //     stickyToolbar: false,
+        //     onChange: (value) => console.log('Content changed:', value),
+        //     initialValue: [
+        //         { type: 'heading-one', children: [{ text: 'Welcome!' }] },
+        //         { type: 'paragraph', children: [
+        //             { text: 'This is ' }, 
+        //             { text: 'bold', bold: true }, 
+        //             { text: ' and ' }, 
+        //             { text: 'italic', italic: true }, 
+        //             { text: ' text.' }
+        //         ]}
+        //     ]
+        // });
+        
+
+        // Control functions
+        function updateEditor() {
+            const theme = document.getElementById('themeSelect').value;
+            const maxHeight = document.getElementById('maxHeightInput').value;
+            const placeholder = document.getElementById('placeholderInput').value;
+            const showWordCount = document.getElementById('showWordCountCheck').checked;
+            const stickyToolbar = document.getElementById('stickyToolbarCheck').checked;
+            const className = document.getElementById('classNameInput').value;
+
+            // Update the first editor using data attributes
+            const editor1 = document.getElementById('editor1');
+            editor1.setAttribute('data-theme', theme);
+            editor1.setAttribute('data-placeholder', placeholder);
+            editor1.setAttribute('data-show-word-count', showWordCount.toString());
+            editor1.setAttribute('data-sticky-toolbar', stickyToolbar.toString());
+            
+            if (maxHeight) {
+                editor1.setAttribute('data-max-height', maxHeight);
+            } else {
+                editor1.removeAttribute('data-max-height');
+            }
+            
+            if (className) {
+                editor1.setAttribute('data-class-name', className);
+            } else {
+                editor1.removeAttribute('data-class-name');
+            }
+
+            showOutput('✅ Editor updated with new configuration!\n\n' +
+                       'Theme: ' + theme + '\n' +
+                       'Max Height: ' + (maxHeight || 'none') + '\n' +
+                       'Show Word Count: ' + showWordCount + '\n' +
+                       'Sticky Toolbar: ' + stickyToolbar + '\n' +
+                       'Custom Class: ' + (className || 'none'));
+        }
+
+        function clearMaxHeight() {
+            document.getElementById('maxHeightInput').value = '';
+            updateEditor();
+        }
+
+        function getEditorContent() {
+            const instance1 = window.BrandNovaEditor.getInstance('editor1');
+            const instance2 = window.BrandNovaEditor.getInstance('editor2');
+            const instance3 = window.BrandNovaEditor.getInstance('editor3');
+
+            let output = '📄 Editor Contents (HTML Export):\n\n';
+            
+            if (instance1) {
+                output += '=== Editor 1 (Auto-init) ===\n' + instance1.getHTML() + '\n\n';
+            }
+            
+            if (instance2) {
+                output += '=== Editor 2 (Manual - Dark) ===\n' + instance2.getHTML() + '\n\n';
+            }
+            
+            if (instance3) {
+                output += '=== Editor 3 (Fixed Height) ===\n' + instance3.getHTML() + '\n\n';
+            }
+
+            showOutput(output);
+        }
+
+        function resetEditor() {
+            // Reset all form controls
+            document.getElementById('themeSelect').value = 'light';
+            document.getElementById('maxHeightInput').value = '';
+            document.getElementById('placeholderInput').value = 'Start writing your content...';
+            document.getElementById('showWordCountCheck').checked = true;
+            document.getElementById('stickyToolbarCheck').checked = true;
+            document.getElementById('classNameInput').value = '';
+
+            // Reset editors
+            updateEditor();
+            
+            showOutput('🔄 All editors reset to default configuration!\n\n' +
+                       'Try the new features:\n' +
+                       '• Enhanced markdown parsing with tables\n' +
+                       '• Tooltips with keyboard shortcuts\n' +
+                       '• Mixed formatting support\n' +
+                       '• Improved accessibility');
+        }
+
+        function showOutput(content) {
+            const output = document.getElementById('output');
+            output.textContent = content;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        // Demo the enhanced features
+        setTimeout(() => {
+            showOutput('🚀 BrandNovaEditor Enhanced Version Loaded!\n\n' +
+                       '✨ New Features:\n' +
+                       '• Enhanced markdown parsing with mixed formatting\n' +
+                       '• Table support with responsive layout\n' +
+                       '• Tooltips showing keyboard shortcuts\n' +
+                       '• Improved accessibility and UX\n\n' +
+                       '📝 Try This:\n' +
+                       '1. Hover over toolbar buttons to see tooltips\n' +
+                       '2. Copy the markdown examples above\n' +
+                       '3. Paste into any editor to see enhanced parsing\n' +
+                       '4. Use keyboard shortcuts (Ctrl+B, Ctrl+I, F11)\n' +
+                       '5. Test table markdown parsing\n\n' +
+                       '🎯 Use the controls above for live configuration!');
+        }, 1000);
+
+        // Show available instances and features
+        console.log('🚀 BrandNovaEditor Enhanced Version');
+        console.log('Available editor instances:', Object.keys(window.BrandNovaEditor?.instances || {}));
+        console.log('New features: Enhanced markdown parsing, table support, enhanced tooltips');
+    </script>
+</body>
+</html>

@@ -20,14 +20,127 @@ const HOTKEYS = {
 const LIST_TYPES = ["numbered-list", "bulleted-list"]
 const TEXT_ALIGN_TYPES = ["left", "center", "right", "justify"]
 
+// Enhanced inline formatting parser that handles mixed formats
+const parseInlineFormatting = (text) => {
+  // Define formatting patterns in order of precedence
+  const patterns = [
+    { regex: /\*\*\*(.*?)\*\*\*/g, format: ['bold', 'italic'] },
+    { regex: /\*\*(.*?)\*\*/g, format: ['bold'] },
+    { regex: /\*(.*?)\*/g, format: ['italic'] },
+    { regex: /~~(.*?)~~/g, format: ['strikethrough'] },
+    { regex: /`(.*?)`/g, format: ['code'] },
+  ]
+
+  // Track all formatting matches
+  const matches = []
+  patterns.forEach(pattern => {
+    let match
+    while ((match = pattern.regex.exec(text)) !== null) {
+      matches.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        text: match[1],
+        format: pattern.format,
+        original: match[0]
+      })
+    }
+  })
+
+  // Sort matches by start position
+  matches.sort((a, b) => a.start - b.start)
+
+  // Remove overlapping matches (keep the first one)
+  const validMatches = []
+  matches.forEach(match => {
+    const overlaps = validMatches.some(existing => 
+      (match.start < existing.end && match.end > existing.start)
+    )
+    if (!overlaps) {
+      validMatches.push(match)
+    }
+  })
+
+  // If no formatting found, return simple text
+  if (validMatches.length === 0) {
+    return [{ text }]
+  }
+
+  // Build the result array
+  const result = []
+  let currentIndex = 0
+
+  validMatches.forEach(match => {
+    // Add text before the match
+    if (match.start > currentIndex) {
+      result.push({ text: text.slice(currentIndex, match.start) })
+    }
+
+    // Add the formatted text
+    const formatObj = { text: match.text }
+    match.format.forEach(fmt => {
+      formatObj[fmt] = true
+    })
+    result.push(formatObj)
+
+    currentIndex = match.end
+  })
+
+  // Add remaining text
+  if (currentIndex < text.length) {
+    result.push({ text: text.slice(currentIndex) })
+  }
+
+  return result.filter(item => item.text !== '')
+}
+
+// Parse basic table structure
+const parseTable = (lines, startIndex) => {
+  const tableLines = []
+  let currentIndex = startIndex
+
+  // Check if it's a valid table (needs header separator)
+  if (currentIndex + 1 >= lines.length) return null
+  
+  const headerLine = lines[currentIndex]
+  const separatorLine = lines[currentIndex + 1]
+  
+  // Basic table validation
+  if (!headerLine.includes('|') || !separatorLine.match(/^\s*\|?[\s\-\|:]+\|?\s*$/)) {
+    return null
+  }
+
+  // Parse header
+  const headers = headerLine.split('|').map(cell => cell.trim()).filter(cell => cell !== '')
+  tableLines.push({ type: 'table-header', children: headers.map(header => ({ text: header })) })
+  
+  currentIndex += 2 // Skip header and separator
+
+  // Parse rows
+  while (currentIndex < lines.length && lines[currentIndex].includes('|')) {
+    const row = lines[currentIndex].split('|').map(cell => cell.trim()).filter(cell => cell !== '')
+    if (row.length > 0) {
+      tableLines.push({ type: 'table-row', children: row.map(cell => ({ text: cell })) })
+    }
+    currentIndex++
+  }
+
+  return {
+    nodes: [{ type: 'table', children: tableLines }],
+    linesConsumed: currentIndex - startIndex
+  }
+}
+
 const parseMarkdown = (text) => {
   const lines = text.split("\n")
   const result = []
   let inCodeBlock = false
   let codeLanguage = ""
   let codeContent = []
+  let i = 0
 
-  for (const line of lines) {
+  while (i < lines.length) {
+    const line = lines[i]
+
     // Handle code blocks
     if (line.startsWith("```")) {
       if (inCodeBlock) {
@@ -45,66 +158,58 @@ const parseMarkdown = (text) => {
         inCodeBlock = true
         codeLanguage = line.slice(3).trim() || "text"
       }
+      i++
       continue
     }
 
     if (inCodeBlock) {
       codeContent.push(line)
+      i++
       continue
     }
 
+    // Check for table
+    if (line.includes('|') && i + 1 < lines.length && lines[i + 1].match(/^\s*\|?[\s\-\|:]+\|?\s*$/)) {
+      const tableResult = parseTable(lines, i)
+      if (tableResult) {
+        result.push(...tableResult.nodes)
+        i += tableResult.linesConsumed
+        continue
+      }
+    }
+
+    // Handle other markdown elements
     if (line.trim() === "---" || line.trim() === "***" || line.trim() === "___") {
       result.push({ type: "horizontal-rule", children: [{ text: "" }] })
     } else if (line.startsWith("# ")) {
-      result.push({ type: "heading-one", children: [{ text: line.slice(2) }] })
+      const children = parseInlineFormatting(line.slice(2))
+      result.push({ type: "heading-one", children })
     } else if (line.startsWith("## ")) {
-      result.push({ type: "heading-two", children: [{ text: line.slice(3) }] })
+      const children = parseInlineFormatting(line.slice(3))
+      result.push({ type: "heading-two", children })
     } else if (line.startsWith("### ")) {
-      result.push({ type: "heading-three", children: [{ text: line.slice(4) }] })
+      const children = parseInlineFormatting(line.slice(4))
+      result.push({ type: "heading-three", children })
     } else if (line.startsWith("> ")) {
-      result.push({ type: "block-quote", children: [{ text: line.slice(2) }] })
+      const children = parseInlineFormatting(line.slice(2))
+      result.push({ type: "block-quote", children })
     } else if (line.startsWith("- ") || line.startsWith("* ")) {
-      result.push({ type: "list-item", children: [{ text: line.slice(2) }] })
+      const children = parseInlineFormatting(line.slice(2))
+      result.push({ type: "list-item", children })
     } else if (line.match(/^\d+\. /)) {
-      result.push({ type: "list-item", children: [{ text: line.replace(/^\d+\. /, "") }] })
-    } else if (line.includes("~~")) {
-      const children = parseInlineFormatting(line, "~~", "strikethrough")
-      result.push({ type: "paragraph", children })
+      const children = parseInlineFormatting(line.replace(/^\d+\. /, ""))
+      result.push({ type: "list-item", children })
     } else if (line.trim() === "") {
       result.push({ type: "paragraph", children: [{ text: "" }] })
     } else {
-      let children = [{ text: line }]
-
-      if (line.includes("**")) {
-        children = parseInlineFormatting(line, "**", "bold")
-      }
-      if (line.includes("*") && !line.includes("**")) {
-        children = parseInlineFormatting(line, "*", "italic")
-      }
-      if (line.includes("`")) {
-        children = parseInlineFormatting(line, "`", "code")
-      }
-
+      const children = parseInlineFormatting(line)
       result.push({ type: "paragraph", children })
     }
+
+    i++
   }
 
   return result.length > 0 ? result : [{ type: "paragraph", children: [{ text: "" }] }]
-}
-
-const parseInlineFormatting = (text, marker, format) => {
-  const parts = text.split(marker)
-  const children = []
-
-  for (let i = 0; i < parts.length; i++) {
-    if (i % 2 === 0) {
-      if (parts[i]) children.push({ text: parts[i] })
-    } else {
-      if (parts[i]) children.push({ text: parts[i], [format]: true })
-    }
-  }
-
-  return children.length > 0 ? children : [{ text }]
 }
 
 // Convert Slate content to HTML
@@ -133,6 +238,9 @@ const serializeToHTML = (nodes) => {
       case 'list-item': return `<li>${children}</li>`
       case 'code-block': return `<pre><code class="language-${node.language || 'text'}">${children}</code></pre>`
       case 'horizontal-rule': return '<hr>'
+      case 'table': return `<table>${children}</table>`
+      case 'table-header': return `<thead><tr>${node.children.map(cell => `<th>${serializeToHTML([cell])}</th>`).join('')}</tr></thead>`
+      case 'table-row': return `<tr>${node.children.map(cell => `<td>${serializeToHTML([cell])}</td>`).join('')}</tr>`
       default: return `<p>${children}</p>`
     }
   }).join('')
@@ -142,7 +250,7 @@ const BrandNovaEditor = ({
   initialValue = [{ type: "paragraph", children: [{ text: "" }] }],
   placeholder = "Start writing your content...",
   onChange,
-  theme = "light",
+  theme = "dark",
   showWordCount = true,
   className = "",
   maxHeight = null,
@@ -227,6 +335,7 @@ const BrandNovaEditor = ({
     (event) => {
       const pastedText = event.clipboardData.getData("text/plain")
 
+      // Enhanced markdown detection
       if (
         pastedText.includes("#") ||
         pastedText.includes("**") ||
@@ -237,7 +346,9 @@ const BrandNovaEditor = ({
         pastedText.includes("---") ||
         pastedText.includes("***") ||
         pastedText.includes("___") ||
-        pastedText.includes("~~")
+        pastedText.includes("~~") ||
+        pastedText.includes("|") ||
+        pastedText.match(/^\d+\. /m)
       ) {
         event.preventDefault()
         const parsedContent = parseMarkdown(pastedText)
@@ -404,6 +515,36 @@ const Element = ({ attributes, children, element, theme = "light" }) => {
         <ol style={style} {...attributes} className="list-decimal list-inside my-4 space-y-2 ml-4">
           {children}
         </ol>
+      )
+    case "table":
+      return (
+        <div className="my-4 overflow-x-auto">
+          <table {...attributes} className={`min-w-full border-collapse border ${isDark ? "border-gray-600" : "border-gray-300"}`}>
+            <tbody>{children}</tbody>
+          </table>
+        </div>
+      )
+    case "table-header":
+      return (
+        <tr {...attributes} className={isDark ? "bg-gray-700" : "bg-gray-100"}>
+          {element.children.map((cell, index) => (
+            <th key={index} className={`border px-4 py-2 text-left font-semibold ${isDark ? "border-gray-600" : "border-gray-300"}`}>
+              {cell.text}
+            </th>
+          ))}
+          {children}
+        </tr>
+      )
+    case "table-row":
+      return (
+        <tr {...attributes}>
+          {element.children.map((cell, index) => (
+            <td key={index} className={`border px-4 py-2 ${isDark ? "border-gray-600" : "border-gray-300"}`}>
+              {cell.text}
+            </td>
+          ))}
+          {children}
+        </tr>
       )
     default:
       return (

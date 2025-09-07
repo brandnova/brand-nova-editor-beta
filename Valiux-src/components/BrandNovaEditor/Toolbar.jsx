@@ -96,7 +96,8 @@ const Toolbar = ({
             theme={theme}
             active={isActive("mark", "bold")}
             onMouseDown={(event) => handleButtonClick("mark", "bold", event)}
-            title="Bold (Ctrl+B)"
+            title="Bold"
+            shortcut="Ctrl+B"
           >
             <Bold className="h-4 w-4" />
           </ToolbarButton>
@@ -104,7 +105,8 @@ const Toolbar = ({
             theme={theme}
             active={isActive("mark", "italic")}
             onMouseDown={(event) => handleButtonClick("mark", "italic", event)}
-            title="Italic (Ctrl+I)"
+            title="Italic"
+            shortcut="Ctrl+I"
           >
             <Italic className="h-4 w-4" />
           </ToolbarButton>
@@ -112,7 +114,8 @@ const Toolbar = ({
             theme={theme}
             active={isActive("mark", "underline")}
             onMouseDown={(event) => handleButtonClick("mark", "underline", event)}
-            title="Underline (Ctrl+U)"
+            title="Underline"
+            shortcut="Ctrl+U"
           >
             <Underline className="h-4 w-4" />
           </ToolbarButton>
@@ -232,7 +235,8 @@ const Toolbar = ({
             theme={theme}
             active={false}
             onMouseDown={(event) => handleButtonClick("action", "undo", event)}
-            title="Undo (Ctrl+Z)"
+            title="Undo"
+            shortcut="Ctrl+Z"
           >
             <Undo className="h-4 w-4" />
           </ToolbarButton>
@@ -240,7 +244,8 @@ const Toolbar = ({
             theme={theme}
             active={false}
             onMouseDown={(event) => handleButtonClick("action", "redo", event)}
-            title="Redo (Ctrl+Y)"
+            title="Redo"
+            shortcut="Ctrl+Y"
           >
             <Redo className="h-4 w-4" />
           </ToolbarButton>
@@ -252,7 +257,8 @@ const Toolbar = ({
             theme={theme}
             active={isActive("action", "fullscreen")}
             onMouseDown={(event) => handleButtonClick("action", "fullscreen", event)}
-            title="Toggle Fullscreen (F11)"
+            title="Toggle Fullscreen"
+            shortcut="F11"
           >
             {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
           </ToolbarButton>
@@ -267,8 +273,16 @@ const Toolbar = ({
   )
 }
 
-const ToolbarButton = ({ active, children, theme = "light", className = "", ...props }) => {
-  const baseStyles = "p-2 rounded transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-opacity-50"
+const ToolbarButton = ({ 
+  active, 
+  children, 
+  theme = "light", 
+  className = "", 
+  title, 
+  shortcut,
+  ...props 
+}) => {
+  const baseStyles = "p-2 rounded transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-opacity-50 relative group"
   
   const activeStyles = active
     ? "bg-amber-100 text-amber-700 shadow-sm ring-1 ring-amber-200"
@@ -279,6 +293,8 @@ const ToolbarButton = ({ active, children, theme = "light", className = "", ...p
     : "text-gray-600 hover:bg-amber-100 hover:text-amber-600"
   
   const disabledStyles = "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+
+  const tooltipText = shortcut ? `${title} (${shortcut})` : title
 
   return (
     <button
@@ -291,9 +307,22 @@ const ToolbarButton = ({ active, children, theme = "light", className = "", ...p
       `}
       role="button"
       tabIndex={0}
+      aria-label={tooltipText}
       {...props}
     >
       {children}
+      
+      {/* Tooltip */}
+      <div className={`absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs rounded shadow-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-500 z-50 whitespace-nowrap ${
+        theme === "dark" 
+          ? "bg-gray-900 text-gray-100 border border-gray-700" 
+          : "bg-gray-800 text-white"
+      }`}>
+        {tooltipText}
+        <div className={`absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent ${
+          theme === "dark" ? "border-t-gray-900" : "border-t-gray-800"
+        }`}></div>
+      </div>
     </button>
   )
 }
