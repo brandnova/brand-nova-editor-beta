@@ -1,2 +1,85 @@
-Upgrade MD support for all headings, lists, tags and tables.
-Update some features and update the README.md file docs.
+More tests
+
+Enter to newline and switch to paragraph not working.
+Work on custom tooling setup. Also to allow for selecting MD paste support, stick toolbar and wordcount options.
+Enhance table support. Optimize table header row contrast so it stands out from other table rows. Include cotingency for when the pasted table is too wide, so it has horizontal scroll.
+Remove the strikethrough and opacity styling for checked items styling in the auto-checklist MD formatting (line-through opacity-60)
+
+Add support for pasted code block too. But give it a base styling without synthax highlighting and other complicated  stuff. Just simple code block that doesn't affect or alter the editor. Knowing that pasted MD content could come with the programming language, include that in the support too to allow for the language to be visible. Heres an example:
+
+
+## 🧑‍💻 Code Blocks
+
+Inline code example: `console.log("Hello, world!")`
+
+```javascript
+// JavaScript Example
+function greet(name) {
+  return `Hello, ${name}!`;
+}
+
+console.log(greet("Brand Nova"));
+```
+
+```python
+# Python Example
+def greet(name):
+    return f"Hello, {name}!"
+
+print(greet("Brand Nova"))
+```
+
+---
+
+
+
+
+
+
+
+Add support for nested lists in the main editor, and for code blocks with syntax highlight
+
+## 📋 Lists
+
+### Unordered List
+
+* Item One
+* Item Two
+
+  * Nested Item A
+  * Nested Item B
+* Item Three
+
+### Ordered List
+
+1. First step
+2. Second step
+
+   1. Sub-step one
+   2. Sub-step two
+3. Final step
+
+---
+
+
+
+## 🧑‍💻 Code Blocks
+
+Inline code example: `console.log("Hello, world!")`
+
+```javascript
+// JavaScript Example
+function greet(name) {
+  return `Hello, ${name}!`;
+}
+
+console.log(greet("Brand Nova"));
+```
+
+```python
+# Python Example
+def greet(name):
+    return f"Hello, {name}!"
+
+print(greet("Brand Nova"))
+```

@@ -4,172 +4,164 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brand Nova Editor - Demo</title>
-    <link rel="stylesheet" href="./brand-nova-editor.css">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./brand-nova-editor-beta.css">
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        .demo-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+        .editor-container {
+            margin: 20px 0;
+        }
+        .config-examples {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        .config-examples .comment {
+            color: #64748b;
+        }
+        .config-examples .active {
+            color: #10b981;
+        }
+        .config-examples .inactive {
+            color: #64748b;
         }
     </style>
 </head>
-<body class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-    <div class="container mx-auto p-6 max-w-5xl">
-        <!-- Header -->
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Brand Nova Editor</h1>
-            <p class="text-gray-600 dark:text-gray-400">Rich Text Editor Demo</p>
+<body>
+    <div class="demo-container">
+        <h1>Brand Nova Editor - Demo</h1>
+        <p>Test different configurations by uncommenting options below and refreshing the page.</p>
+        
+        <!-- Single active editor instance -->
+        <div class="editor-container">
+            <div id="editor-main"></div>
         </div>
 
-        <!-- Controls -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">
-            <div class="flex flex-wrap items-center justify-between gap-4">
-                <div class="flex items-center gap-4">
-                    <div class="flex items-center gap-2">
-                        <label for="theme-select" class="text-sm font-medium text-gray-700 dark:text-gray-300">Theme:</label>
-                        <select id="theme-select" class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                            <option value="light">Light</option>
-                            <option value="dark">Dark</option>
-                        </select>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
+        <h2>Configuration Options</h2>
+        <div class="config-examples">
+<span class="comment">// ACTIVE: Standard Configuration</span>
+<span class="active">BrandNovaEditor.init({
+  elementId: "editor-main",
+  preset: "standard",
+  theme: "light",
+  colors: { primary: "#3b82f6" },
+  placeholder: "Standard editor with markdown paste support...",
+  compact: false
+});</span>
 
-        <!-- Editor -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div id="brand-nova-editor"></div>
-        </div>
+<span class="comment">// OPTION 1: Dark Theme Full Features</span>
+<span class="inactive">/*
+BrandNovaEditor.init({
+  elementId: "editor-main",
+  preset: "full",
+  theme: "dark",
+  colors: { primary: "#10b981", background: "#1e293b", text: "#f1f5f9" },
+  placeholder: "Dark theme with all features including alignments...",
+  compact: false
+});
+*/</span>
 
-        <!-- Status -->
-        <div id="status" class="mt-4 p-3 rounded-md hidden"></div>
+<span class="comment">// OPTION 2: Custom Toolbar Configuration</span>
+<span class="inactive">/*
+BrandNovaEditor.init({
+  elementId: "editor-main",
+  preset: "custom",
+  customTools: ["bold", "italic", "underline", "heading1", "heading2", "bulletList", "numberedList", "paragraph"],
+  theme: "light",
+  colors: { primary: "#f59e0b", accent: "#fbbf24" },
+  placeholder: "Custom toolbar for specific needs...",
+  compact: false
+});
+*/</span>
+
+<span class="comment">// OPTION 3: Minimal Compact Editor</span>
+<span class="inactive">/*
+BrandNovaEditor.init({
+  elementId: "editor-main",
+  preset: "minimal",
+  theme: "light",
+  compact: true,
+  colors: { primary: "#ef4444", background: "#fef2f2" },
+  placeholder: "Minimal compact editor for simple text...",
+});
+*/</span>
+
+<span class="comment">// OPTION 4: Full Featured with Custom Colors</span>
+<span class="inactive">/*
+BrandNovaEditor.init({
+  elementId: "editor-main",
+  preset: "full",
+  theme: "light",
+  colors: { 
+    primary: "#8b5cf6",
+    accent: "#a78bfa",
+    background: "#faf5ff",
+    text: "#581c87",
+    border: "#d8b4fe"
+  },
+  placeholder: "Full editor with custom purple theme...",
+  compact: false
+});
+*/</span>
+
+<span class="comment">// OPTION 5: Blog Writing Setup</span>
+<span class="inactive">/*
+BrandNovaEditor.init({
+  elementId: "editor-main",
+  preset: "custom",
+  customTools: ["bold", "italic", "heading1", "heading2", "heading3", "bulletList", "numberedList", "blockquote", "horizontalRule", "paragraph"],
+  theme: "light",
+  colors: { primary: "#059669", accent: "#10b981" },
+  placeholder: "Perfect setup for blog writing...",
+  compact: false
+});
+*/</span>
+
+<span class="comment">// OPTION 6: Documentation Editor</span>
+<span class="inactive">/*
+BrandNovaEditor.init({
+  elementId: "editor-main",
+  preset: "custom",
+  customTools: ["bold", "italic", "code", "heading1", "heading2", "heading3", "bulletList", "numberedList", "blockquote", "alignLeft", "alignCenter", "paragraph"],
+  theme: "light",
+  colors: { primary: "#0ea5e9", accent: "#38bdf8", background: "#f0f9ff" },
+  placeholder: "Documentation editor with code support...",
+  compact: false
+});
+*/</span>
+        </div>
     </div>
 
     <script src="./brand-nova-editor.umd.js"></script>
     <script>
-        let editorInstance = null;
-        let currentTheme = 'light';
-
-        function initEditor() {
-            if (editorInstance) {
-                editorInstance.destroy();
-            }
-
-            editorInstance = window.BrandNovaEditor.init({
-                elementId: 'brand-nova-editor',
-                theme: currentTheme,
-                placeholder: 'Start writing your content...',
-                showWordCount: true,
-                stickyToolbar: true,
-                maxHeight: 600,
-                initialValue: [
-                    {
-                        type: 'heading-one',
-                        children: [{ text: 'Welcome to Brand Nova Editor' }]
-                    },
-                    {
-                        type: 'paragraph',
-                        children: [{ text: 'This rich text editor supports ' }, { text: 'bold', bold: true }, { text: ', ' }, { text: 'italic', italic: true }, { text: ', and ' }, { text: 'underlined', underline: true }, { text: ' text, along with headings, lists, and more.' }]
-                    },
-                    {
-                        type: 'heading-two',
-                        children: [{ text: 'Try these features:' }]
-                    },
-                    {
-                        type: 'bulleted-list',
-                        children: [
-                            { type: 'list-item', children: [{ text: 'Text formatting (bold, italic, underline)' }] },
-                            { type: 'list-item', children: [{ text: 'Multiple heading levels' }] },
-                            { type: 'list-item', children: [{ text: 'Bullet and numbered lists' }] },
-                            { type: 'list-item', children: [{ text: 'Block quotes and code blocks' }] },
-                            { type: 'list-item', children: [{ text: 'Text alignment options' }] }
-                        ]
-                    },
-                    {
-                        type: 'paragraph',
-                        children: [{ text: '' }]
-                    }
-                ],
-                onChange: function(value) {
-                    localStorage.setItem('brand-nova-content', JSON.stringify(value));
-                }
-            });
-        }
-
-        function updateTheme() {
-            document.documentElement.classList.toggle('dark', currentTheme === 'dark');
-            initEditor();
-        }
-
-        function clearEditor() {
-            if (editorInstance) {
-                editorInstance.setValue([{ type: 'paragraph', children: [{ text: '' }] }]);
-                showStatus('Editor cleared', 'success');
-            }
-        }
-
-        function getContent() {
-            if (editorInstance) {
-                const content = editorInstance.getValue();
-                console.log('Current content:', content);
-                showStatus('Content logged to console', 'info');
-            }
-        }
-
-        function saveContent() {
-            if (editorInstance) {
-                const content = editorInstance.getValue();
-                localStorage.setItem('brand-nova-saved', JSON.stringify({
-                    content: content,
-                    timestamp: new Date().toISOString()
-                }));
-                showStatus('Content saved successfully!', 'success');
-            }
-        }
-
-        function showStatus(message, type) {
-            const status = document.getElementById('status');
-            status.textContent = message;
-            status.className = `mt-4 p-3 rounded-md ${
-                type === 'success' 
-                    ? 'bg-green-50 text-green-800 border border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800' 
-                    : 'bg-blue-50 text-blue-800 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800'
-            }`;
-            status.classList.remove('hidden');
-            
-            setTimeout(() => status.classList.add('hidden'), 3000);
-        }
-
-        // Theme selector handler
-        document.getElementById('theme-select').addEventListener('change', function(e) {
-            currentTheme = e.target.value;
-            updateTheme();
-            showStatus(`Theme changed to ${currentTheme}`, 'info');
-        });
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            updateTheme();
-            initEditor();
-            
-            // Load saved content
-            const saved = localStorage.getItem('brand-nova-content');
-            if (saved) {
-                try {
-                    const content = JSON.parse(saved);
-                    setTimeout(() => editorInstance.setValue(content), 100);
-                } catch (e) {
-                    console.warn('Could not load saved content');
-                }
-            }
-        });
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-                e.preventDefault();
-                saveContent();
-            }
+        BrandNovaEditor.init({
+          elementId: "editor-main",
+          preset: "standard",
+          theme: "light",
+          colors: { primary: "#3b82f6" },
+          placeholder: "Standard editor with markdown paste support...",
+          compact: false
         });
     </script>
 </body>

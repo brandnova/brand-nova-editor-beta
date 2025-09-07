@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrandNovaEditor - Production Example</title>
+    <!-- Include your built CSS and JS files -->
+    <link rel="stylesheet" href="dist/brand-nova-editor.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+        label {
+            font-weight: 500;
+            min-width: 120px;
+        }
+        input, select {
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            padding: 8px 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .demo-section {
+            margin-bottom: 30px;
+        }
+        .demo-section h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+        #output {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>BrandNovaEditor - Production Usage Example</h1>
+        
+        <div class="demo-section">
+            <h3>Dynamic Configuration Controls</h3>
+            <div class="controls">
+                <div class="control-group">
+                    <label>Theme:</label>
+                    <select id="themeSelect">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>Max Height (px):</label>
+                    <input type="number" id="maxHeightInput" placeholder="e.g., 300" min="100" max="800" step="50">
+                    <button onclick="clearMaxHeight()">Clear</button>
+                </div>
+                
+                <div class="control-group">
+                    <label>Placeholder:</label>
+                    <input type="text" id="placeholderInput" value="Start crafting your story here...">
+                </div>
+                
+                <div class="control-group">
+                    <label>Show Word Count:</label>
+                    <input type="checkbox" id="showWordCountCheck" checked>
+                </div>
+                
+                <div class="control-group">
+                    <label>Sticky Toolbar:</label>
+                    <input type="checkbox" id="stickyToolbarCheck" checked>
+                </div>
+                
+                <div class="control-group">
+                    <label>Custom Class:</label>
+                    <input type="text" id="classNameInput" placeholder="e.g., my-custom-editor">
+                </div>
+                
+                <div class="control-group">
+                    <button onclick="updateEditor()">Update Editor</button>
+                    <button onclick="getEditorContent()">Get HTML Content</button>
+                    <button onclick="resetEditor()">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h3>Editor Instance</h3>
+            <!-- Method 1: Auto-initialization with data attributes -->
+            <div 
+                id="editor1" 
+                data-brand-nova-editor
+                data-theme="light"
+                data-placeholder="Start crafting your story here..."
+                data-show-word-count="true"
+                data-sticky-toolbar="true"
+            ></div>
+        </div>
+
+        <div class="demo-section">
+            <h3>Manual Initialization Example</h3>
+            <div id="editor2"></div>
+        </div>
+
+        <div class="demo-section">
+            <h3>Fixed Height Example (400px)</h3>
+            <div 
+                id="editor3" 
+                data-brand-nova-editor
+                data-max-height="400"
+                data-placeholder="This editor has a fixed height with scrolling..."
+                data-theme="light"
+            ></div>
+        </div>
+
+        <div id="output"></div>
+    </div>
+
+    <!-- Include your built JavaScript file -->
+    <script src="dist/brand-nova-editor.js"></script>
+    
+    <script>
+        // Manual initialization example
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize editor2 manually
+            const editor2Instance = window.BrandNovaEditor.init({
+                elementId: 'editor2',
+                theme: 'dark',
+                placeholder: 'This editor was initialized manually with dark theme...',
+                showWordCount: true,
+                maxHeight: null,
+                stickyToolbar: false,
+                onChange: (value) => {
+                    console.log('Editor2 content changed:', value);
+                },
+                initialValue: [
+                    { type: 'heading-one', children: [{ text: 'Welcome to BrandNovaEditor!' }] },
+                    { type: 'paragraph', children: [{ text: 'This is a ' }, { text: 'rich text editor', bold: true }, { text: ' with many features.' }] },
+                    { type: 'bulleted-list', children: [
+                        { type: 'list-item', children: [{ text: 'Real-time markdown parsing' }] },
+                        { type: 'list-item', children: [{ text: 'Keyboard shortcuts' }] },
+                        { type: 'list-item', children: [{ text: 'Fullscreen mode' }] }
+                    ]}
+                ]
+            });
+        });
+
+        // Control functions
+        function updateEditor() {
+            const theme = document.getElementById('themeSelect').value;
+            const maxHeight = document.getElementById('maxHeightInput').value;
+            const placeholder = document.getElementById('placeholderInput').value;
+            const showWordCount = document.getElementById('showWordCountCheck').checked;
+            const stickyToolbar = document.getElementById('stickyToolbarCheck').checked;
+            const className = document.getElementById('classNameInput').value;
+
+            // Update the first editor using data attributes
+            const editor1 = document.getElementById('editor1');
+            editor1.setAttribute('data-theme', theme);
+            editor1.setAttribute('data-placeholder', placeholder);
+            editor1.setAttribute('data-show-word-count', showWordCount.toString());
+            editor1.setAttribute('data-sticky-toolbar', stickyToolbar.toString());
+            
+            if (maxHeight) {
+                editor1.setAttribute('data-max-height', maxHeight);
+            } else {
+                editor1.removeAttribute('data-max-height');
+            }
+            
+            if (className) {
+                editor1.setAttribute('data-class-name', className);
+            } else {
+                editor1.removeAttribute('data-class-name');
+            }
+
+            // Update the manual editor using the API
+            window.BrandNovaEditor.updateProps('editor2', {
+                theme: theme === 'light' ? 'dark' : 'light', // Opposite theme for contrast
+                placeholder: placeholder + ' (Manual Editor)',
+                showWordCount,
+                stickyToolbar,
+                maxHeight: maxHeight ? parseInt(maxHeight) : null,
+                className: className + ' manual-editor'
+            });
+
+            showOutput('Editors updated with new configuration!');
+        }
+
+        function clearMaxHeight() {
+            document.getElementById('maxHeightInput').value = '';
+            updateEditor();
+        }
+
+        function getEditorContent() {
+            const instance1 = window.BrandNovaEditor.getInstance('editor1');
+            const instance2 = window.BrandNovaEditor.getInstance('editor2');
+            const instance3 = window.BrandNovaEditor.getInstance('editor3');
+
+            let output = 'Editor Contents:\n\n';
+            
+            if (instance1) {
+                output += 'Editor 1 (Auto-init):\n' + instance1.getHTML() + '\n\n';
+            }
+            
+            if (instance2) {
+                output += 'Editor 2 (Manual):\n' + instance2.getHTML() + '\n\n';
+            }
+            
+            if (instance3) {
+                output += 'Editor 3 (Fixed Height):\n' + instance3.getHTML() + '\n\n';
+            }
+
+            showOutput(output);
+        }
+
+        function resetEditor() {
+            // Reset all form controls
+            document.getElementById('themeSelect').value = 'light';
+            document.getElementById('maxHeightInput').value = '';
+            document.getElementById('placeholderInput').value = 'Start crafting your story here...';
+            document.getElementById('showWordCountCheck').checked = true;
+            document.getElementById('stickyToolbarCheck').checked = true;
+            document.getElementById('classNameInput').value = '';
+
+            // Reset editors
+            updateEditor();
+            
+            showOutput('Editors reset to default configuration!');
+        }
+
+        function showOutput(content) {
+            const output = document.getElementById('output');
+            output.textContent = content;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        // Demo some advanced usage
+        setTimeout(() => {
+            showOutput('BrandNovaEditor loaded successfully!\n\nTry the controls above to see live prop updates.\nAll editors support:\n- Real-time markdown parsing\n- Keyboard shortcuts (Ctrl+B, Ctrl+I, F11, etc.)\n- Fullscreen mode\n- Responsive design\n- Accessibility features');
+        }, 1000);
+
+        // Show available instances
+        console.log('Available editor instances:', window.BrandNovaEditor.instances);
+    </script>
+</body>
+</html>

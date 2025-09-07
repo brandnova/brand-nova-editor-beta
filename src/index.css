@@ -207,11 +207,3 @@
     }
   }
 }
-
-/* Enhanced tooltip styles */
-.logo-container [role="tooltip"] {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}

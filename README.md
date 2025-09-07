@@ -1,232 +1,214 @@
-# Brand Nova Rich Text Editor Beta
+# Brand Nova Editor
 
-A powerful, customizable rich text editor built with Slate.js and React. Designed for seamless integration into any web project including Django, PHP, HTML, and modern JavaScript frameworks.
+A customizable rich text editor built with React and Slate.js. Designed for easy integration into Django, HTML, PHP, and other web projects via standalone JavaScript and CSS files.
 
-## ✨ Features
+## Features
 
-### Core Functionality
-- **Rich Text Editing**: Full-featured WYSIWYG editor with Slate.js
-- **Theme Support**: Light and dark themes with smooth transitions
-- **Keyboard Shortcuts**: Comprehensive keyboard support for power users
-- **Accessibility**: WCAG compliant with screen reader support
+- **Three Preset Configurations**: Minimal, Standard, and Full
+- **Customizable Theming**: Light/dark themes with color overrides
+- **Enhanced Markdown Paste Support**: Auto-formatting for pasted markdown content including tables, checklists, multi-line quotes, and links (Standard and Full presets)
+- **Paragraph Tool**: Reset formatting to normal text with dedicated paragraph button
+- **Auto-Reset Headings**: Automatically converts headings to paragraphs when pressing Enter
+- **Text Alignment**: Left, center, right, and justify alignment (Full preset only)
+- **Responsive Design**: Works on desktop and mobile devices
+- **Accessibility**: Full keyboard navigation and screen reader support
+- **Standalone Deployment**: Generate JS/CSS files for any web framework
+- **Real-time Configuration**: Live preview of configuration changes
+- **Demo HTML**: Included demo file for testing standalone builds
 
-### Toolbar Tools
-- **Text Formatting**: Bold, italic, underline, strikethrough, inline code
-- **Headings**: H1, H2, H3, H4, H5, H6 with normal text reset
-- **Lists**: Ordered and unordered lists with proper nesting
-- **Text Alignment**: Left, center, right, justify 
+## Preset Configurations
 
+### Minimal
+- **Tools**: Bold, Italic, Underline, Strikethrough, Heading 1, Paragraph Tool
+- **Features**: Word count
 
-## 🚀 Quick Start
+### Standard  
+- **Tools**: Bold, Italic, Underline, Strikethrough, Headings 1-3, Bulleted Lists, Numbered Lists, Paragraph Tool
+- **Features**: Word count, Enhanced markdown paste support
 
-### Installation
+### Full
+- **Tools**: All formatting options + Text alignment (left, center, right, justify), Block quotes, Horizontal rules, Code formatting, Paragraph Tool
+- **Features**: Word count, Enhanced markdown paste support, Sticky toolbar
+
+## Installation & Setup
+
+### For React Projects
 
 \`\`\`bash
-# Clone the repository
-git clone https://github.com/your-username/brand-nova-editor.git
-cd brand-nova-editor
-
-# Install dependencies
 npm install
-
-# Build for standalone use
-npm run build:standalone
+npm start
 \`\`\`
 
-### Integration
+### For Django/HTML/PHP Projects
 
-#### HTML Projects
+1. **Build standalone files**:
+   \`\`\`bash
+   npm run build:standalone
+   \`\`\`
 
-1. Copy the built files to your project:
-\`\`\`
-dist/
-├── brand-nova-editor.js
-├── brand-nova-editor.css
-└── assets/
-\`\`\`
+2. **Include in your template**:
+   \`\`\`html
+   <link rel="stylesheet" href="path/to/brand-nova-editor.css">
+   <script src="path/to/brand-nova-editor.js"></script>
+   \`\`\`
 
-2. Include in your HTML:
-\`\`\`html
-<!DOCTYPE html>
-<html>
-<head>
-    <link rel="stylesheet" href="brand-nova-editor.css">
-</head>
-<body>
-    <!-- Editor container -->
-    <div id="my-editor" data-brand-nova-editor data-niche="writer"></div>
-    
-    <!-- Include the script -->
-    <script src="brand-nova-editor.js"></script>
-    
-    <!-- Initialize -->
-    <script>
-        window.BrandNovaEditor.init({
-            elementId: "my-editor",
-            theme: "light",
-            placeholder: "Start writing...",
-            onChange: (content) => {
-                console.log("Content changed:", content);
-            }
-        });
-    </script>
-</body>
-</html>
-\`\`\`
+3. **Auto-initialization with data attributes**:
+   \`\`\`html
+   <div 
+     id="my-editor" 
+     data-brand-nova-editor
+     data-preset="full"
+     data-theme="dark"
+     data-colors='{"primary": "#10b981", "background": "#1f2937", "text": "#f9fafb"}'
+     data-compact="true"
+   ></div>
+   \`\`\`
 
-#### Django Projects
+4. **Manual initialization**:
+   \`\`\`html
+   <div id="editor"></div>
+   
+   <script>
+   BrandNovaEditor.init({
+     elementId: 'editor',
+     preset: 'standard',
+     theme: 'light',
+     placeholder: 'Start writing...',
+     colors: {
+       primary: '#3b82f6',
+       background: '#ffffff',
+       text: '#1f2937',
+       textSecondary: '#6b7280',
+       border: '#e5e7eb',
+       toolbarBg: '#f9fafb',
+       hoverBg: '#f3f4f6',
+       accent: '#10b981'
+     },
+     compact: false,
+     features: ['wordCount', 'stickyToolbar'],
+     onChange: function(content) {
+       console.log('Content changed:', content);
+     }
+   });
+   </script>
+   \`\`\`
 
-1. Copy files to `static/js/` and `static/css/`:
-\`\`\`
-static/
-├── css/brand-nova-editor.css
-├── js/brand-nova-editor.js
-└── js/assets/
-\`\`\`
+## Testing Standalone Build
 
-2. In your template:
-\`\`\`html
-{% load static %}
+After running `npm run build:standalone`, open `dist-standalone/demo.html` in your browser to test the editor with live configuration controls and full feature examples.
 
-<!-- In head -->
-<link rel="stylesheet" href="{% static 'css/brand-nova-editor.css' %}">
+## Configuration Options
 
-<!-- In body -->
-<div id="article-editor" data-brand-nova-editor data-niche="blogger"></div>
-
-<!-- Before closing body -->
-<script src="{% static 'js/brand-nova-editor.js' %}"></script>
-<script>
-    window.BrandNovaEditor.init({
-        elementId: "article-editor",
-        theme: "light",
-        onChange: (content) => {
-            // Send to Django backend
-            fetch("{% url 'save_article' %}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": "{{ csrf_token }}"
-                },
-                body: JSON.stringify({ content: content })
-            });
-        }
-    });
-</script>
-\`\`\`
-
-#### PHP Projects
-
-1. Copy files to your assets directory
-2. Include in your PHP template:
-\`\`\`php
-<!DOCTYPE html>
-<html>
-<head>
-    <link rel="stylesheet" href="assets/brand-nova-editor.css">
-</head>
-<body>
-    <div id="content-editor" data-brand-nova-editor data-niche="developer"></div>
-    
-    <script src="assets/brand-nova-editor.js"></script>
-    <script>
-        window.BrandNovaEditor.init({
-            elementId: "content-editor",
-            onChange: (content) => {
-                // Send to PHP backend
-                fetch("save_content.php", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ content: content })
-                });
-            }
-        });
-    </script>
-</body>
-</html>
-\`\`\`
-
-## ⚙️ Configuration Options
-
+### Complete Configuration Object
 \`\`\`javascript
-window.BrandNovaEditor.init({
-    // Required
-    elementId: "my-editor",           // DOM element ID
-    
-    // Optional
-    theme: "light",                  // light|dark
-    placeholder: "Start writing...", // Placeholder text
-    initialValue: [],                // Initial Slate.js value
-    showWordCount: true,             // Show word count
-    stickyToolbar: true,             // Sticky toolbar behavior
-    maxHeight: "500px",              // Maximum editor height
-    className: "custom-editor",      // Additional CSS classes
-    
-    // Callbacks
-    onChange: (content) => {},       // Content change handler
-    onReady: (editor) => {},         // Editor ready callback
-    onFocus: () => {},               // Focus event
-    onBlur: () => {}                 // Blur event
+BrandNovaEditor.init({
+  elementId: "editor-id",           // Required: DOM element ID
+  preset: "full",                   // "minimal" | "standard" | "full"
+  theme: "light",                   // "light" | "dark"
+  compact: false,                   // Boolean: compact layout
+  
+  // Color customization
+  colors: {
+    primary: "#3b82f6",            // Brand/accent color
+    background: "#ffffff",          // Editor background
+    text: "#1f2937",               // Main text color
+    textSecondary: "#6b7280",      // Secondary text
+    border: "#e5e7eb",             // Border colors
+    toolbarBg: "#f9fafb",          // Toolbar background
+    hoverBg: "#f3f4f6",            // Hover states
+    accent: "#10b981"              // Success/accent color
+  },
+  
+  // Feature control
+  features: [                      // Array or "all" | "basic" | "standard"
+    "wordCount",                   // Show word/character count
+    "markdownPaste",               // Enhanced markdown paste (standard & full presets)
+    "stickyToolbar"                // Sticky toolbar on scroll
+  ],
+  
+  // Content options
+  placeholder: "Start writing...",  // Placeholder text
+  initialValue: [...],             // Initial Slate.js value
+  onChange: (value) => {...}       // Change callback
 });
 \`\`\`
 
-## ⌨️ Keyboard Shortcuts
+### Enhanced Markdown Support (Standard & Full Presets)
 
-| Shortcut | Action |
-|----------|--------|
-| `Ctrl+B` | Bold |
-| `Ctrl+I` | Italic |
-| `Ctrl+U` | Underline |
-| `Ctrl+E` | Inline Code |
-| `Ctrl+Z` | Undo |
-| `Ctrl+Shift+Z` | Redo |
-| `Ctrl+0` | Normal Text |
-| `Ctrl+1-6` | Headings H1-H6 |
-| `F11` | Full Screen |
-| `Ctrl+K` | Insert Link *(Coming Soon)* |
+The editor automatically formats pasted markdown content including:
+- **Headings**: `# ## ###` (H1, H2, H3 only)
+- **Lists**: Bulleted (`- *`) and numbered (`1. 2.`)
+- **Tables**: Full table support with `|` separators and improved styling
+- **Checklists**: `- [ ]` and `- [x]` checkbox items with enhanced visual styling
+- **Multi-line quotes**: `>` with proper line breaks
+- **Links**: `[text](url)` format
+- **Inline formatting**: Bold (`**`), italic (`*`), code (`` ` ``), strikethrough (`~~`)
+- **Horizontal rules**: `---`, `***`, `___`
 
-## 🎨 Theming
+### Editor Behavior Features
 
-### Built-in Themes
-- **Light Theme**: Clean, professional appearance
-- **Dark Theme**: Easy on the eyes for extended writing
+- **Auto-Reset Headings**: When typing in a heading (H1, H2, H3) and pressing Enter, the next line automatically becomes a paragraph
+- **Paragraph Tool**: Click the paragraph button in the toolbar to reset any formatted text back to normal paragraph formatting
+- **Text Alignment**: Use alignment tools (Full preset) to align text left, center, right, or justify
+- **Enhanced Table Styling**: Tables now render with proper borders, padding, and rounded corners
+- **Improved Checklist Display**: Checkboxes are properly styled with theme colors and better alignment
 
-### Custom Themes
-Override CSS variables to create custom themes:
+### Advanced Customization
 
-\`\`\`css
-.brand-nova-editor[data-theme="custom"] {
-    --editor-bg: #your-color;
-    --editor-text: #your-color;
-    --toolbar-bg: #your-color;
-    --button-hover: #your-color;
-    --border-color: #your-color;
-}
-\`\`\`
+Edit `src/theme-config.js` to customize:
+- **Colors**: Primary, background, text, borders, hover states
+- **Typography**: Font family, sizes, line height  
+- **Spacing**: Padding, margins, border radius, border width
+- **Component styling**: Toolbar height, button sizes, editor min-height
+- **Preset configurations**: Modify which tools appear in each preset
 
-## 🔧 Development
+## Development
 
-### Local Development
 \`\`\`bash
-# Start development server
-npm run dev
+# Install dependencies
+npm install
+
+# Start development server (with live configuration controls)
+npm start
 
 # Build for production
 npm run build
 
-# Build standalone version
+# Build standalone files
 npm run build:standalone
+
+# Test standalone build
+# Open dist-standalone/demo.html in browser
 \`\`\`
 
-### Project Structure
+## File Structure
+
 \`\`\`
 src/
-├── components/
-│   └── BrandNovaEditor/
-│       ├── BrandNovaEditor.jsx    # Main editor component
-│       ├── Toolbar.jsx            # Toolbar component
-│       └── index.js
-├── standalone.js                  # Standalone build entry
-└── assets/
-    └── logo.png                   # Editor logo
+├── components/BrandNovaEditor/
+│   ├── BrandNovaEditor.jsx    # Main editor component
+│   └── Toolbar.jsx            # Toolbar component
+├── theme-config.js            # Customization settings
+├── App.jsx                    # Development app with live controls
+├── standalone.js              # Standalone initialization
+└── main.jsx                   # React entry point
+
+public/
+└── demo.html                  # Demo file for standalone testing
+
+dist-standalone/               # Generated after build:standalone
+├── brand-nova-editor.js       # Standalone JavaScript
+├── brand-nova-editor.css      # Standalone CSS
+└── demo.html                  # Demo file (copied from public/)
 \`\`\`
+
+## Browser Support
+
+- Chrome 60+
+- Firefox 55+
+- Safari 12+
+- Edge 79+
+
+## License
+
+MIT License - feel free to use in commercial projects.

@@ -6,8 +6,7 @@ import { Slate, Editable, withReact } from "slate-react"
 import { withHistory } from "slate-history"
 import isHotkey from "is-hotkey"
 import Toolbar from "./Toolbar"
-
-import logoImage from "../../assets/logo.png"
+import { themeConfig, presets } from "../../theme-config"
 
 const HOTKEYS = {
   "mod+b": "bold",
@@ -22,48 +21,172 @@ const TEXT_ALIGN_TYPES = ["left", "center", "right", "justify"]
 const parseMarkdown = (text) => {
   const lines = text.split("\n")
   const result = []
+  let i = 0
 
-  for (const line of lines) {
-    if (line.trim() === "---" || line.trim() === "***" || line.trim() === "___") {
+  while (i < lines.length) {
+    const line = lines[i]
+
+    // Handle tables
+    if (line.includes("|") && lines[i + 1] && lines[i + 1].includes("|")) {
+      const tableRows = []
+      let j = i
+
+      // Collect all table rows, skip separator lines
+      while (j < lines.length && lines[j].includes("|")) {
+        if (!lines[j].match(/^[\s|\-:]+$/)) {
+          const cells = lines[j]
+            .split("|")
+            .map((cell) => cell.trim())
+            .filter((cell) => cell !== "")
+          if (cells.length > 0) {
+            tableRows.push({
+              type: "table-row",
+              children: cells.map((cell) => ({
+                type: "table-cell",
+                children: [{ text: cell }],
+              })),
+            })
+          }
+        }
+        j++
+      }
+
+      if (tableRows.length > 0) {
+        result.push({
+          type: "table",
+          children: tableRows,
+        })
+      }
+      i = j
+      continue
+    }
+
+    if (line.match(/^[\s]*[-*] \[([ xX])\] /)) {
+      const checked = line.includes("[x]") || line.includes("[X]")
+      const text = line.replace(/^[\s]*[-*] \[([ xX])\] /, "")
+      result.push({
+        type: "check-list-item",
+        checked: checked,
+        children: [{ text: text }],
+      })
+    }
+    // Handle horizontal rules
+    else if (line.trim() === "---" || line.trim() === "***" || line.trim() === "___") {
       result.push({ type: "horizontal-rule", children: [{ text: "" }] })
-    } else if (line.startsWith("# ")) {
+    }
+    // Handle headings
+    else if (line.startsWith("# ")) {
       result.push({ type: "heading-one", children: [{ text: line.slice(2) }] })
     } else if (line.startsWith("## ")) {
       result.push({ type: "heading-two", children: [{ text: line.slice(3) }] })
     } else if (line.startsWith("### ")) {
       result.push({ type: "heading-three", children: [{ text: line.slice(4) }] })
-    } else if (line.startsWith("> ")) {
-      result.push({ type: "block-quote", children: [{ text: line.slice(2) }] })
-    } else if (line.startsWith("- ") || line.startsWith("* ")) {
+    }
+    // Handle multi-line quotes
+    else if (line.startsWith("> ")) {
+      const quoteLines = []
+      let j = i
+
+      // Collect all consecutive quote lines
+      while (j < lines.length && lines[j].startsWith("> ")) {
+        quoteLines.push(lines[j].slice(2))
+        j++
+      }
+
+      result.push({
+        type: "block-quote",
+        children: [{ text: quoteLines.join("\n") }],
+      })
+      i = j
+      continue
+    }
+    // Handle bullet lists
+    else if (line.startsWith("- ") || line.startsWith("* ")) {
       result.push({ type: "list-item", children: [{ text: line.slice(2) }] })
-    } else if (line.match(/^\d+\. /)) {
+    }
+    // Handle numbered lists
+    else if (line.match(/^\d+\. /)) {
       result.push({ type: "list-item", children: [{ text: line.replace(/^\d+\. /, "") }] })
-    } else if (line.includes("~~")) {
-      const children = parseInlineFormatting(line, "~~", "strikethrough")
-      result.push({ type: "paragraph", children })
-    } else if (line.trim() === "") {
+    }
+    // Handle empty lines
+    else if (line.trim() === "") {
       result.push({ type: "paragraph", children: [{ text: "" }] })
-    } else {
-      let children = [{ text: line }]
-
-      if (line.includes("**")) {
-        children = parseInlineFormatting(line, "**", "bold")
-      }
-      if (line.includes("*") && !line.includes("**")) {
-        children = parseInlineFormatting(line, "*", "italic")
-      }
-      if (line.includes("`")) {
-        children = parseInlineFormatting(line, "`", "code")
-      }
-
+    }
+    // Handle regular paragraphs with inline formatting
+    else {
+      const children = parseInlineFormatting(line)
       result.push({ type: "paragraph", children })
     }
+
+    i++
   }
 
   return result.length > 0 ? result : [{ type: "paragraph", children: [{ text: "" }] }]
 }
 
-const parseInlineFormatting = (text, marker, format) => {
+const parseInlineFormatting = (text) => {
+  const children = []
+  const currentText = text
+
+  // Parse links first [text](url)
+  const linkRegex = /\[([^\]]+)\]$$([^)]+)$$/g
+  let lastIndex = 0
+  let match
+
+  while ((match = linkRegex.exec(text)) !== null) {
+    // Add text before the link
+    if (match.index > lastIndex) {
+      const beforeText = text.slice(lastIndex, match.index)
+      children.push(...parseOtherFormatting(beforeText))
+    }
+
+    // Add the link
+    children.push({
+      type: "link",
+      url: match[2],
+      children: [{ text: match[1] }],
+    })
+
+    lastIndex = match.index + match[0].length
+  }
+
+  // Add remaining text after last link
+  if (lastIndex < text.length) {
+    const remainingText = text.slice(lastIndex)
+    children.push(...parseOtherFormatting(remainingText))
+  }
+
+  // If no links found, parse other formatting
+  if (children.length === 0) {
+    return parseOtherFormatting(text)
+  }
+
+  return children
+}
+
+const parseOtherFormatting = (text) => {
+  // Handle bold, italic, code, strikethrough
+  const parts = []
+  const currentIndex = 0
+
+  // Simple approach: handle one format at a time
+  if (text.includes("**")) {
+    return parseInlineFormat(text, "**", "bold")
+  }
+  if (text.includes("*") && !text.includes("**")) {
+    return parseInlineFormat(text, "*", "italic")
+  }
+  if (text.includes("`")) {
+    return parseInlineFormat(text, "`", "code")
+  }
+  if (text.includes("~~")) {
+    return parseInlineFormat(text, "~~", "strikethrough")
+  }
+
+  return [{ text }]
+}
+
+const parseInlineFormat = (text, marker, format) => {
   const parts = text.split(marker)
   const children = []
 
@@ -82,22 +205,46 @@ const BrandNovaEditor = ({
   initialValue = [{ type: "paragraph", children: [{ text: "" }] }],
   placeholder = "Start writing your content...",
   onChange,
-  theme = "light",
-  showWordCount = true,
-  className = "",
-  maxHeight = null,
-  stickyToolbar = true,
+
+  preset = "standard", // "minimal", "standard", "full"
+  colors = {}, // Color overrides
+  compact = false, // Compact layout
+  features = "all", // "basic", "standard", "all" or array
+  theme = "light", // Keep for backward compatibility
 }) => {
+  const currentTheme = useMemo(() => {
+    const baseColors = themeConfig.colors[theme] || themeConfig.colors.light
+    return {
+      ...baseColors,
+      ...colors, // Apply color overrides
+    }
+  }, [theme, colors])
+
+  const presetConfig = useMemo(() => {
+    if (typeof preset === "string" && presets[preset]) {
+      return presets[preset]
+    }
+    return presets.standard // fallback
+  }, [preset])
+
+  const activeFeatures = useMemo(() => {
+    if (features === "all") return presetConfig.features
+    if (features === "basic") return ["wordCount"]
+    if (features === "standard") return ["wordCount"]
+    if (Array.isArray(features)) return features
+    return presetConfig.features
+  }, [features, presetConfig])
+
   const [value, setValue] = useState(initialValue)
   const [wordCount, setWordCount] = useState(0)
   const [charCount, setCharCount] = useState(0)
   const [isToolbarSticky, setIsToolbarSticky] = useState(false)
   const editorContainerRef = useRef(null)
   const toolbarRef = useRef(null)
-  
-  const renderElement = useCallback((props) => <Element {...props} theme={theme} />, [theme])
-  const renderLeaf = useCallback((props) => <Leaf {...props} theme={theme} />, [theme])
-  
+
+  const renderElement = useCallback((props) => <Element {...props} theme={currentTheme} />, [currentTheme])
+  const renderLeaf = useCallback((props) => <Leaf {...props} theme={currentTheme} />, [currentTheme])
+
   const editor = useMemo(() => {
     const e = withHistory(withReact(createEditor()))
 
@@ -110,9 +257,8 @@ const BrandNovaEditor = ({
     return e
   }, [])
 
-  // Handle sticky toolbar logic
   useEffect(() => {
-    if (!stickyToolbar || maxHeight) {
+    if (!activeFeatures.includes("stickyToolbar") || compact) {
       setIsToolbarSticky(false)
       return
     }
@@ -122,20 +268,16 @@ const BrandNovaEditor = ({
 
       const containerRect = editorContainerRef.current.getBoundingClientRect()
       const toolbarHeight = toolbarRef.current.offsetHeight
-      
-      // Make toolbar sticky when container top goes above viewport
-      // and unsticky when container bottom is close to viewport top
-      const shouldBeSticky = containerRect.top <= 0 && 
-                           containerRect.bottom > toolbarHeight + 20
 
+      const shouldBeSticky = containerRect.top <= 0 && containerRect.bottom > toolbarHeight + 20
       setIsToolbarSticky(shouldBeSticky)
     }
 
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    handleScroll() // Initial check
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    handleScroll()
 
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [stickyToolbar, maxHeight])
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [activeFeatures, compact])
 
   const handleChange = useCallback(
     (newValue) => {
@@ -167,12 +309,36 @@ const BrandNovaEditor = ({
           toggleMark(editor, mark)
         }
       }
+
+      if (event.key === "Enter") {
+        const { selection } = editor
+        if (selection) {
+          const [match] = Array.from(
+            Editor.nodes(editor, {
+              match: (n) =>
+                !Editor.isEditor(n) &&
+                SlateElement.isElement(n) &&
+                (n.type === "heading-one" || n.type === "heading-two" || n.type === "heading-three"),
+            }),
+          )
+
+          if (match) {
+            event.preventDefault()
+            // Insert a new line and convert to paragraph
+            Transforms.insertBreak(editor)
+            Transforms.setNodes(editor, { type: "paragraph" })
+            return
+          }
+        }
+      }
     },
     [editor],
   )
 
   const handlePaste = useCallback(
     (event) => {
+      if ((preset !== "full" && preset !== "standard") || !activeFeatures.includes("markdownPaste")) return
+
       const pastedText = event.clipboardData.getData("text/plain")
 
       if (
@@ -185,89 +351,101 @@ const BrandNovaEditor = ({
         pastedText.includes("---") ||
         pastedText.includes("***") ||
         pastedText.includes("___") ||
-        pastedText.includes("~~")
+        pastedText.includes("~~") ||
+        pastedText.includes("|") ||
+        pastedText.includes("- [") ||
+        (pastedText.includes("[") && pastedText.includes("]("))
       ) {
         event.preventDefault()
-
         const parsedContent = parseMarkdown(pastedText)
         Transforms.insertNodes(editor, parsedContent)
       }
     },
-    [editor],
+    [editor, activeFeatures, preset],
   )
 
+  const containerStyles = {
+    backgroundColor: currentTheme.background,
+    borderColor: currentTheme.border,
+    borderRadius: themeConfig.spacing.borderRadius,
+    borderWidth: themeConfig.spacing.borderWidth,
+  }
+
+  const headerStyles = {
+    backgroundColor: currentTheme.toolbarBg,
+    borderColor: currentTheme.border,
+    padding: compact
+      ? `${Number.parseInt(themeConfig.spacing.padding.header) / 2}px`
+      : themeConfig.spacing.padding.header,
+  }
+
+  const editorContentStyles = {
+    backgroundColor: currentTheme.background,
+    padding: compact
+      ? `${Number.parseInt(themeConfig.spacing.padding.editor) / 2}px`
+      : themeConfig.spacing.padding.editor,
+    minHeight: compact ? "200px" : themeConfig.components.editor.minHeight,
+  }
+
   return (
-    <div className={`brand-nova-editor ${theme} ${className}`}>
+    <div className={`brand-nova-editor ${theme}`} key={`${preset}-${theme}-${compact}`}>
       <div
         ref={editorContainerRef}
-        className={`editor-container ${theme === "dark" ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"} rounded-lg shadow-lg border overflow-hidden`}
+        className="editor-container rounded-lg shadow-lg border overflow-hidden"
         style={{
-          maxHeight: maxHeight ? `${maxHeight}px` : undefined,
-          height: maxHeight ? `${maxHeight}px` : undefined,
+          ...containerStyles,
           display: "flex",
           flexDirection: "column",
         }}
       >
-        {/* Editor Header */}
-        <div
-          className={`editor-header ${theme === "dark" ? "bg-gray-800 border-gray-700" : "bg-gray-50 border-gray-200"} px-4 py-2 border-b flex items-center justify-between flex-shrink-0`}
-        >
-          <div className="flex items-center space-x-3">
-            <div className="logo-container relative group">
-              <img
-                src={logoImage || "/placeholder.svg"}
-                alt="Brand Nova"
-                className="w-7 h-7 rounded-full object-cover shadow-md ring-2 ring-yellow-400/20"
-              />
-              <div
-                className={`absolute left-9 top-1/2 transform -translate-y-1/2 ${theme === "dark" ? "bg-gray-700 text-white" : "bg-black text-white"} px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10 shadow-lg`}
-                role="tooltip"
-                aria-label="Brand Nova Editor"
-              >
-                BRAND NOVA
-              </div>
-            </div>
-          </div>
-          {showWordCount && (
+        {activeFeatures.includes("wordCount") && (
+          <div
+            className="editor-header px-4 py-2 border-b flex items-center justify-end flex-shrink-0"
+            style={headerStyles}
+          >
             <div
-              className={`flex items-center space-x-4 text-xs ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}
+              className="flex items-center space-x-4 text-xs"
+              style={{ color: currentTheme.textSecondary }}
               aria-live="polite"
               aria-label={`Content statistics: ${wordCount} words, ${charCount} characters`}
             >
               <span>{wordCount} words</span>
               <span>{charCount} characters</span>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         <Slate editor={editor} initialValue={value} onValueChange={handleChange}>
           {/* Toolbar Container */}
-          <div 
+          <div
             ref={toolbarRef}
             className={`
-              ${isToolbarSticky ? 'fixed top-0 left-0 right-0 z-50 shadow-lg' : 'relative'} 
-              ${!maxHeight && stickyToolbar ? 'transition-all duration-200 ease-in-out' : ''} 
+              ${isToolbarSticky ? "fixed top-0 left-0 right-0 z-50 shadow-lg" : "relative"} 
+              ${activeFeatures.includes("stickyToolbar") ? "transition-all duration-200 ease-in-out" : ""} 
               flex-shrink-0
             `}
-            style={isToolbarSticky ? {
-              width: editorContainerRef.current?.offsetWidth + 'px',
-              marginLeft: editorContainerRef.current?.getBoundingClientRect().left + 'px'
-            } : {}}
+            style={
+              isToolbarSticky
+                ? {
+                    width: editorContainerRef.current?.offsetWidth + "px",
+                    marginLeft: editorContainerRef.current?.getBoundingClientRect().left + "px",
+                  }
+                : {}
+            }
           >
-            <Toolbar 
-              theme={theme} 
+            <Toolbar
+              theme={currentTheme}
+              preset={presetConfig}
               isSticky={isToolbarSticky}
-              className={isToolbarSticky ? 'rounded-none border-l-0 border-r-0' : ''}
+              compact={compact}
+              className={isToolbarSticky ? "rounded-none border-l-0 border-r-0" : ""}
             />
           </div>
 
           {/* Editor Content */}
           <div
-            className={`editor-content p-6 ${theme === "dark" ? "bg-gray-900" : "bg-white"} flex-1`}
-            style={{
-              overflowY: maxHeight ? "auto" : "visible",
-              minHeight: maxHeight ? undefined : "400px",
-            }}
+            className="editor-content flex-1"
+            style={editorContentStyles}
             role="textbox"
             aria-multiline="true"
             aria-label="Rich text editor"
@@ -280,8 +458,12 @@ const BrandNovaEditor = ({
               autoFocus
               onKeyDown={handleKeyDown}
               onPaste={handlePaste}
-              className={`${maxHeight ? "min-h-0" : "min-h-[400px]"} focus:outline-none prose prose-lg max-w-none ${theme === "dark" ? "prose-invert" : ""}`}
-              aria-describedby={showWordCount ? "word-count" : undefined}
+              className="focus:outline-none prose prose-lg max-w-none"
+              style={{
+                color: currentTheme.text,
+                minHeight: compact ? "150px" : "400px",
+              }}
+              aria-describedby={activeFeatures.includes("wordCount") ? "word-count" : undefined}
             />
           </div>
         </Slate>
@@ -290,24 +472,23 @@ const BrandNovaEditor = ({
   )
 }
 
-const Element = ({ attributes, children, element, theme = "light" }) => {
+const Element = ({ attributes, children, element, theme }) => {
   const style = { textAlign: element.align }
-  const isDark = theme === "dark"
-  
+
   switch (element.type) {
     case "horizontal-rule":
       return (
         <div {...attributes} contentEditable={false} className="my-6">
-          <hr className={`border-t-2 ${isDark ? "border-gray-600" : "border-gray-300"}`} />
+          <hr style={{ borderColor: theme.border, borderTopWidth: "2px" }} />
           {children}
         </div>
       )
     case "block-quote":
       return (
         <blockquote
-          style={style}
+          style={{ ...style, color: theme.text, borderLeftColor: theme.accent, borderLeftWidth: "4px" }}
           {...attributes}
-          className={`border-l-4 border-yellow-400 pl-4 italic ${isDark ? "text-gray-300" : "text-gray-700"} my-4`}
+          className="pl-4 italic my-4 whitespace-pre-line"
         >
           {children}
         </blockquote>
@@ -320,25 +501,25 @@ const Element = ({ attributes, children, element, theme = "light" }) => {
       )
     case "heading-one":
       return (
-        <h1 style={style} {...attributes} className={`text-3xl font-bold ${isDark ? "text-gray-100" : "text-gray-900"} my-4`}>
+        <h1 style={{ ...style, color: theme.text }} {...attributes} className="text-3xl font-bold my-4">
           {children}
         </h1>
       )
     case "heading-two":
       return (
-        <h2 style={style} {...attributes} className={`text-2xl font-bold ${isDark ? "text-gray-100" : "text-gray-900"} my-3`}>
+        <h2 style={{ ...style, color: theme.text }} {...attributes} className="text-2xl font-bold my-3">
           {children}
         </h2>
       )
     case "heading-three":
       return (
-        <h3 style={style} {...attributes} className={`text-xl font-bold ${isDark ? "text-gray-100" : "text-gray-900"} my-3`}>
+        <h3 style={{ ...style, color: theme.text }} {...attributes} className="text-xl font-bold my-3">
           {children}
         </h3>
       )
     case "list-item":
       return (
-        <li style={style} {...attributes} className="my-1">
+        <li style={{ ...style, color: theme.text }} {...attributes} className="my-1">
           {children}
         </li>
       )
@@ -348,31 +529,107 @@ const Element = ({ attributes, children, element, theme = "light" }) => {
           {children}
         </ol>
       )
-    case "link":
+    case "check-list-item":
       return (
-        <a {...attributes} href={element.url} className="text-yellow-600 hover:text-yellow-700 underline">
+        <div style={{ ...style, color: theme.text }} {...attributes} className="flex items-start my-2 group">
+          <input
+            type="checkbox"
+            checked={element.checked}
+            className="mr-3 mt-1 rounded border-2 flex-shrink-0 cursor-pointer"
+            style={{
+              borderColor: theme.border,
+              backgroundColor: element.checked ? theme.accent : theme.background,
+              accentColor: theme.accent,
+              width: "16px",
+              height: "16px",
+            }}
+            contentEditable={false}
+            readOnly
+          />
+          <span
+            className={`flex-1 ${element.checked ? "" : ""}`}
+            style={{
+              color: theme.text,
+              lineHeight: "1.5",
+              paddingTop: "1px",
+            }}
+          >
+            {children}
+          </span>
+        </div>
+      )
+    case "table":
+      return (
+        <div {...attributes} className="my-6 overflow-x-auto">
+          <table
+            className="w-full border-collapse shadow-sm"
+            style={{
+              borderColor: theme.border,
+              borderWidth: "1px",
+              borderRadius: "8px",
+              overflow: "hidden",
+              backgroundColor: theme.background,
+            }}
+          >
+            <tbody>{children}</tbody>
+          </table>
+        </div>
+      )
+    case "table-row":
+      return (
+        <tr
+          {...attributes}
+          className="hover:bg-opacity-50"
+          style={{
+            backgroundColor: theme.hoverBg + "20", // 20% opacity
+          }}
+        >
           {children}
-        </a>
+        </tr>
+      )
+    case "table-cell":
+      const isFirstRow = element.parent?.children?.[0] === element.parent
+      const isHeader = isFirstRow
+
+      return (
+        <td
+          {...attributes}
+          className={`px-4 py-3 border-r border-b last:border-r-0 ${isHeader ? "font-semibold" : ""}`}
+          style={{
+            borderColor: theme.border,
+            color: theme.text,
+            backgroundColor: isHeader ? theme.hoverBg + "40" : "transparent", // Header background
+            verticalAlign: "top",
+            lineHeight: "1.5",
+            fontWeight: isHeader ? "600" : "400",
+          }}
+        >
+          {children}
+        </td>
       )
     default:
       return (
-        <p style={style} {...attributes} className="my-2 leading-relaxed">
+        <p style={{ ...style, color: theme.text }} {...attributes} className="my-2 leading-relaxed">
           {children}
         </p>
       )
   }
 }
 
-const Leaf = ({ attributes, children, leaf, theme = "light" }) => {
-  const isDark = theme === "dark"
-  
+const Leaf = ({ attributes, children, leaf, theme }) => {
   if (leaf.bold) {
     children = <strong>{children}</strong>
   }
 
   if (leaf.code) {
     children = (
-      <code className={`px-1 py-0.5 rounded text-sm font-mono ${isDark ? "bg-gray-800 text-gray-200" : "bg-gray-100 text-gray-800"}`}>
+      <code
+        className="px-1 py-0.5 rounded text-sm font-mono"
+        style={{
+          backgroundColor: theme.hoverBg,
+          color: theme.text,
+        }}
+      >
         {children}
       </code>
     )
@@ -390,7 +647,11 @@ const Leaf = ({ attributes, children, leaf, theme = "light" }) => {
     children = <del>{children}</del>
   }
 
-  return <span {...attributes}>{children}</span>
+  return (
+    <span {...attributes} style={{ color: theme.text }}>
+      {children}
+    </span>
+  )
 }
 
 const toggleBlock = (editor, format) => {

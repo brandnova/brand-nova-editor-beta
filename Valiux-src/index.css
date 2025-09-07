@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Rich Text Editor Sticky Toolbar Styles */
+.rich-text-editor .sticky-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: inherit;
+}
+
+.rich-text-editor .static-toolbar {
+  position: relative;
+  z-index: 10;
+}
+
+/* Fullscreen editor styles */
+.fullscreen-editor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  background: inherit;
+}
+
+.fullscreen-container {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  border-radius: 0 !important;
+  border: none !important;
+}
+
+/* Ensure proper stacking context */
+.rich-text-editor .toolbar-wrapper {
+  flex-shrink: 0;
+}
+
+/* Smooth transitions for theme changes */
+.rich-text-editor * {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+/* Override sticky behavior when editor has maxHeight */
+.editor-container[style*="max-height"] .sticky-toolbar {
+  position: relative;
+  top: auto;
+}

@@ -1,3 +1,4 @@
+// src/standalone.js
 import React from "react"
 import { createRoot } from "react-dom/client"
 import BrandNovaEditor from "./components/BrandNovaEditor"
@@ -12,11 +13,6 @@ window.BrandNovaEditor = {
       placeholder = "Start writing your content...",
       onChange = null,
       theme = "light",
-      preset = "minimal",
-      colors = {},
-      compact = false,
-      features = "all",
-      // Keep backward compatibility
       showWordCount = true,
       className = "",
       maxHeight = null,
@@ -31,25 +27,16 @@ window.BrandNovaEditor = {
 
     const root = createRoot(element)
 
-    let finalFeatures = features
-    if (features === "all" && (!showWordCount || !stickyToolbar)) {
-      finalFeatures = []
-      if (showWordCount) finalFeatures.push("wordCount")
-      if (stickyToolbar) finalFeatures.push("stickyToolbar")
-      finalFeatures.push("markdownPaste")
-    }
-
     const EditorWrapper = () =>
       React.createElement(BrandNovaEditor, {
         initialValue: initialValue,
         placeholder: placeholder,
         onChange: onChange,
         theme: theme,
-        preset: preset,
-        colors: colors,
-        compact: compact,
-        features: finalFeatures,
+        showWordCount: showWordCount,
         className: className,
+        maxHeight: maxHeight,
+        stickyToolbar: stickyToolbar,
       })
 
     root.render(React.createElement(EditorWrapper))
@@ -70,12 +57,6 @@ document.addEventListener("DOMContentLoaded", () => {
       elementId: element.id,
       theme: element.dataset.theme || "light",
       placeholder: element.dataset.placeholder || "Start writing your content...",
-      preset: element.dataset.preset || "standard",
-      compact: element.dataset.compact === "true",
-      features: element.dataset.features || "all",
-      // Parse colors from JSON string if provided
-      colors: element.dataset.colors ? JSON.parse(element.dataset.colors) : {},
-      // Backward compatibility
       showWordCount: element.dataset.showWordCount !== "false",
       maxHeight: element.dataset.maxHeight ? Number.parseInt(element.dataset.maxHeight) : null,
       stickyToolbar: element.dataset.stickyToolbar !== "false",

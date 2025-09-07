@@ -17,55 +17,73 @@ import {
   AlignCenter,
   AlignRight,
   AlignJustify,
-  Minus
+  Minus,
+  Type,
 } from "lucide-react"
 import { toggleBlock, toggleMark, isBlockActive, isMarkActive } from "./BrandNovaEditor"
 
-const Toolbar = ({ theme = "light", isSticky = false, className = "" }) => {
+const Toolbar = ({ theme, preset, isSticky = false, compact = false, className = "" }) => {
   const editor = useSlate()
 
-  const toolbarGroups = [
-    {
-      name: "Text Formatting",
-      items: [
-        { type: "mark", format: "bold", icon: Bold, label: "Bold (Ctrl+B)", shortcut: "Ctrl+B" },
-        { type: "mark", format: "italic", icon: Italic, label: "Italic (Ctrl+I)", shortcut: "Ctrl+I" },
-        { type: "mark", format: "underline", icon: Underline, label: "Underline (Ctrl+U)", shortcut: "Ctrl+U" },
-        { type: "mark", format: "strikethrough", icon: Strikethrough, label: "Strikethrough", shortcut: null },
-        { type: "mark", format: "code", icon: Code, label: "Inline Code (Ctrl+`)", shortcut: "Ctrl+`" },
-      ]
+  const allTools = {
+    bold: { type: "mark", format: "bold", icon: Bold, label: "Bold (Ctrl+B)", shortcut: "Ctrl+B" },
+    italic: { type: "mark", format: "italic", icon: Italic, label: "Italic (Ctrl+I)", shortcut: "Ctrl+I" },
+    underline: { type: "mark", format: "underline", icon: Underline, label: "Underline (Ctrl+U)", shortcut: "Ctrl+U" },
+    strikethrough: {
+      type: "mark",
+      format: "strikethrough",
+      icon: Strikethrough,
+      label: "Strikethrough",
+      shortcut: null,
     },
-    {
-      name: "Headings",
-      items: [
-        { type: "block", format: "heading-one", icon: Heading1, label: "Heading 1", shortcut: null },
-        { type: "block", format: "heading-two", icon: Heading2, label: "Heading 2", shortcut: null },
-        { type: "block", format: "heading-three", icon: Heading3, label: "Heading 3", shortcut: null },
-      ]
+    code: { type: "mark", format: "code", icon: Code, label: "Inline Code (Ctrl+`)", shortcut: "Ctrl+`" },
+    "heading-one": { type: "block", format: "heading-one", icon: Heading1, label: "Heading 1", shortcut: null },
+    "heading-two": { type: "block", format: "heading-two", icon: Heading2, label: "Heading 2", shortcut: null },
+    "heading-three": { type: "block", format: "heading-three", icon: Heading3, label: "Heading 3", shortcut: null },
+    paragraph: { type: "block", format: "paragraph", icon: Type, label: "Paragraph", shortcut: null }, // Added paragraph tool
+    "bulleted-list": { type: "block", format: "bulleted-list", icon: List, label: "Bullet List", shortcut: null },
+    "numbered-list": {
+      type: "block",
+      format: "numbered-list",
+      icon: ListOrdered,
+      label: "Numbered List",
+      shortcut: null,
     },
-    {
-      name: "Lists and Blocks",
-      items: [
-        { type: "block", format: "bulleted-list", icon: List, label: "Bullet List", shortcut: null },
-        { type: "block", format: "numbered-list", icon: ListOrdered, label: "Numbered List", shortcut: null },
-        { type: "block", format: "block-quote", icon: Quote, label: "Block Quote", shortcut: null },
-        { type: "block", format: "horizontal-rule", icon: Minus, label: "Horizontal Rule", shortcut: null },
-      ]
+    "block-quote": { type: "block", format: "block-quote", icon: Quote, label: "Block Quote", shortcut: null },
+    "horizontal-rule": {
+      type: "block",
+      format: "horizontal-rule",
+      icon: Minus,
+      label: "Horizontal Rule",
+      shortcut: null,
     },
-    {
-      name: "Alignment",
-      items: [
-        { type: "align", format: "left", icon: AlignLeft, label: "Align Left", shortcut: null },
-        { type: "align", format: "center", icon: AlignCenter, label: "Center", shortcut: null },
-        { type: "align", format: "right", icon: AlignRight, label: "Align Right", shortcut: null },
-        { type: "align", format: "justify", icon: AlignJustify, label: "Justify", shortcut: null },
-      ]
-    }
-  ]
+    left: { type: "align", format: "left", icon: AlignLeft, label: "Align Left", shortcut: null },
+    center: { type: "align", format: "center", icon: AlignCenter, label: "Center", shortcut: null },
+    right: { type: "align", format: "right", icon: AlignRight, label: "Align Right", shortcut: null },
+    justify: { type: "align", format: "justify", icon: AlignJustify, label: "Justify", shortcut: null },
+  }
+
+  const activeTools = preset?.tools ? preset.tools.map((toolName) => allTools[toolName]).filter(Boolean) : []
+
+  const toolbarGroups = []
+  const textFormatting = activeTools.filter((tool) => tool.type === "mark")
+  const headings = activeTools.filter((tool) => tool.format.startsWith("heading"))
+  const paragraphTool = activeTools.filter((tool) => tool.format === "paragraph") // Added paragraph tool grouping
+  const blocks = activeTools.filter(
+    (tool) => tool.type === "block" && !tool.format.startsWith("heading") && tool.format !== "paragraph",
+  )
+  const alignment = activeTools.filter((tool) => tool.type === "align")
+
+  if (textFormatting.length > 0) toolbarGroups.push({ name: "Text Formatting", items: textFormatting })
+  if (headings.length > 0 || paragraphTool.length > 0) {
+    toolbarGroups.push({ name: "Headings", items: [...headings, ...paragraphTool] }) // Combined headings and paragraph tool
+  }
+  if (blocks.length > 0) toolbarGroups.push({ name: "Lists and Blocks", items: blocks })
+  if (alignment.length > 0) toolbarGroups.push({ name: "Alignment", items: alignment })
 
   const handleButtonClick = (item, event) => {
     event.preventDefault()
-    
+
     if (item.type === "mark") {
       toggleMark(editor, item.format)
     } else if (item.type === "block") {
@@ -91,44 +109,49 @@ const Toolbar = ({ theme = "light", isSticky = false, className = "" }) => {
     return false
   }
 
+  const toolbarStyles = {
+    backgroundColor: theme.toolbarBg,
+    borderColor: theme.border,
+    padding: compact ? "8px 16px" : "12px 24px",
+  }
+
   return (
     <div
-      className={`toolbar ${theme === "dark" ? "bg-gray-800 border-gray-700" : "bg-gray-50 border-gray-200"} border-b px-6 py-3 ${className}`}
+      className={`toolbar border-b ${className}`}
+      style={toolbarStyles}
       role="toolbar"
       aria-label="Text formatting toolbar"
     >
-      <div className="flex flex-wrap items-center gap-2">
+      <div className={`flex flex-wrap items-center ${compact ? "gap-1" : "gap-2"}`}>
         {toolbarGroups.map((group, groupIndex) => (
           <div key={group.name} className="flex items-center gap-1">
-            <div 
-              className="flex items-center gap-1"
-              role="group"
-              aria-label={group.name}
-            >
+            <div className="flex items-center gap-1" role="group" aria-label={group.name}>
               {group.items.map((item) => {
                 const IconComponent = item.icon
                 const active = isActive(item)
-                
+
                 return (
                   <ToolbarButton
                     key={item.format}
                     theme={theme}
                     active={active}
+                    compact={compact}
                     onMouseDown={(event) => handleButtonClick(item, event)}
                     aria-label={item.label}
                     aria-pressed={active}
                     title={item.shortcut ? `${item.label} (${item.shortcut})` : item.label}
                   >
-                    <IconComponent size={16} aria-hidden="true" />
+                    <IconComponent size={compact ? 14 : 16} aria-hidden="true" />
                   </ToolbarButton>
                 )
               })}
             </div>
-            
+
             {/* Group separator */}
             {groupIndex < toolbarGroups.length - 1 && (
-              <div 
-                className={`w-px h-6 mx-2 ${theme === "dark" ? "bg-gray-600" : "bg-gray-300"}`}
+              <div
+                className={`w-px h-6 mx-2`}
+                style={{ backgroundColor: theme.border }}
                 role="separator"
                 aria-orientation="vertical"
               />
@@ -136,7 +159,7 @@ const Toolbar = ({ theme = "light", isSticky = false, className = "" }) => {
           </div>
         ))}
       </div>
-      
+
       {/* Screen reader instructions */}
       <div className="sr-only" aria-live="polite" id="toolbar-instructions">
         Use the toolbar buttons to format your text. Press Tab to navigate between buttons, Space or Enter to activate.
@@ -145,28 +168,40 @@ const Toolbar = ({ theme = "light", isSticky = false, className = "" }) => {
   )
 }
 
-const ToolbarButton = ({ active, children, theme = "light", className = "", ...props }) => {
-  const baseStyles = "p-2 rounded transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-50"
-  
-  const activeStyles = active
-    ? "bg-yellow-100 text-yellow-700 shadow-sm ring-1 ring-yellow-200"
-    : ""
-    
-  const hoverStyles = theme === "dark"
-    ? "text-gray-300 hover:bg-gray-700 hover:text-white hover:shadow-sm"
-    : "text-gray-600 hover:bg-gray-200 hover:text-gray-800 hover:shadow-sm"
-  
-  const disabledStyles = "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+const ToolbarButton = ({ active, children, theme, compact = false, className = "", ...props }) => {
+  const baseStyles = `${compact ? "p-1.5" : "p-2"} rounded transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-opacity-50`
+
+  const buttonStyles = {
+    color: active ? theme.primary : theme.textSecondary,
+    backgroundColor: active ? theme.hoverBg : "transparent",
+    borderColor: active ? theme.primary : "transparent",
+    borderWidth: active ? "1px" : "0px",
+  }
+
+  const hoverStyles = {
+    ":hover": {
+      backgroundColor: theme.hoverBg,
+      color: theme.text,
+    },
+  }
 
   return (
     <button
       type="button"
-      className={`
-        ${baseStyles}
-        ${active ? activeStyles : hoverStyles}
-        ${disabledStyles}
-        ${className}
-      `}
+      className={`${baseStyles} ${className}`}
+      style={buttonStyles}
+      onMouseEnter={(e) => {
+        if (!active) {
+          e.target.style.backgroundColor = theme.hoverBg
+          e.target.style.color = theme.text
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!active) {
+          e.target.style.backgroundColor = "transparent"
+          e.target.style.color = theme.textSecondary
+        }
+      }}
       role="button"
       tabIndex={0}
       {...props}
