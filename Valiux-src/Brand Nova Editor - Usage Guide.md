@@ -9,12 +9,13 @@ A powerful, flexible rich text editor built with React and Slate.js, designed fo
 - 📋 **Enhanced Markdown Support** - Advanced markdown parsing with mixed formatting and tables
 - 🔤 **Typography** - Multiple heading levels, quotes, lists
 - 📊 **Table Support** - Basic markdown table parsing and rendering
-- ⌨️ **Keyboard Shortcuts** - Standard shortcuts with tooltips (Ctrl+B, Ctrl+I, etc.)
+- ⌨️ **Keyboard Shortcuts** - Standard shortcuts with tooltips (Ctrl+B, Ctrl+I, Ctrl+Shift+S, etc.)
 - 🖥️ **Fullscreen Mode** - F11 or toolbar button
 - 📊 **Word/Character Count** - Optional status bar
 - 📱 **Responsive Design** - Works on all screen sizes
 - ♿ **Accessibility** - ARIA labels, keyboard navigation
-- 🔧 **Highly Configurable** - Extensive prop customization
+- 🔧 **Configurable Toolbar** - Customize which tools appear in the toolbar
+- 🎛️ **Full/Partial Editor Modes** - Switch between full-featured and minimal editors
 - 📦 **Standalone Ready** - Use in any HTML page
 
 ## Installation & Build
@@ -46,6 +47,56 @@ All props can be configured both in React and via data attributes in standalone 
 | `className` | `string` | `""` | Additional CSS classes |
 | `maxHeight` | `number \| null` | `null` | Maximum height in pixels (enables scrolling) |
 | `stickyToolbar` | `boolean` | `true` | Enable sticky toolbar on scroll |
+| `fullEditor` | `boolean` | `true` | Enable all toolbar tools (overrides toolbarConfig) |
+| `toolbarConfig` | `object` | `DEFAULT_TOOLBAR_CONFIG` | Custom toolbar configuration |
+
+## Toolbar Configuration
+
+### Full vs Partial Editor Modes
+
+- **Full Editor** (`fullEditor: true`): Shows all available tools grouped logically
+- **Partial Editor** (`fullEditor: false`): Shows only tools specified in `toolbarConfig`
+
+### Available Tool Groups
+
+```javascript
+const DEFAULT_TOOLBAR_CONFIG = {
+  formatting: ['bold', 'italic', 'underline', 'strikethrough'],
+  headings: ['heading-one', 'heading-two', 'heading-three', 'paragraph'],
+  alignment: ['left', 'center', 'right', 'justify'],
+  blocks: ['block-quote', 'bulleted-list', 'numbered-list'],
+  actions: ['undo', 'redo'],
+  fullscreen: ['fullscreen']
+}
+```
+
+### Custom Toolbar Examples
+
+```javascript
+// Minimal editor for comments
+const commentConfig = {
+  formatting: ['bold', 'italic', 'strikethrough']
+}
+
+// Blog post editor
+const blogConfig = {
+  formatting: ['bold', 'italic', 'underline'],
+  headings: ['heading-one', 'heading-two', 'heading-three', 'paragraph'],
+  blocks: ['block-quote', 'bulleted-list', 'numbered-list'],
+  actions: ['undo', 'redo'],
+  fullscreen: ['fullscreen']
+}
+
+// Documentation editor
+const docsConfig = {
+  formatting: ['bold', 'italic', 'underline', 'strikethrough'],
+  headings: ['heading-one', 'heading-two', 'heading-three', 'paragraph'],
+  alignment: ['left', 'center', 'right'],
+  blocks: ['block-quote', 'bulleted-list', 'numbered-list'],
+  actions: ['undo', 'redo'],
+  fullscreen: ['fullscreen']
+}
+```
 
 ## Usage Examples
 
@@ -59,6 +110,13 @@ function App() {
     { type: "paragraph", children: [{ text: "" }] }
   ]);
 
+  // Custom toolbar configuration
+  const customToolbar = {
+    formatting: ['bold', 'italic'],
+    headings: ['heading-one', 'paragraph'],
+    actions: ['undo', 'redo']
+  };
+
   return (
     <BrandNovaEditor
       initialValue={content}
@@ -69,6 +127,8 @@ function App() {
       stickyToolbar={false}
       placeholder="Start writing..."
       className="my-editor"
+      fullEditor={false}
+      toolbarConfig={customToolbar}
     />
   );
 }
@@ -85,16 +145,24 @@ function App() {
     <link rel="stylesheet" href="dist/brand-nova-editor.css">
 </head>
 <body>
-    <!-- Auto-initialized editor -->
+    <!-- Full editor -->
     <div 
-        id="my-editor" 
+        id="full-editor" 
         data-brand-nova-editor
         data-theme="light"
-        data-placeholder="Start writing your story..."
-        data-show-word-count="true"
-        data-max-height="500"
-        data-sticky-toolbar="false"
-        data-class-name="custom-editor"
+        data-placeholder="Full editor with all tools..."
+        data-full-editor="true"
+    ></div>
+    
+    <!-- Custom toolbar editor -->
+    <div 
+        id="custom-editor"
+        data-brand-nova-editor
+        data-theme="dark"
+        data-placeholder="Custom toolbar editor..."
+        data-full-editor="false"
+        data-toolbar-config='{"formatting": ["bold", "italic"], "headings": ["heading-one", "paragraph"], "actions": ["undo", "redo"]}'
+        data-max-height="300"
     ></div>
     
     <script src="dist/brand-nova-editor.js"></script>
@@ -115,22 +183,31 @@ function App() {
     
     <script src="dist/brand-nova-editor.js"></script>
     <script>
+        // Custom toolbar configuration
+        const customConfig = {
+            formatting: ['bold', 'italic', 'strikethrough'],
+            headings: ['heading-one', 'heading-two'],
+            blocks: ['bulleted-list'],
+            actions: ['undo', 'redo']
+        };
+        
         // Initialize manually
         const editor = window.BrandNovaEditor.init({
             elementId: 'my-editor',
+            fullEditor: false,
+            toolbarConfig: customConfig,
             theme: 'dark',
             placeholder: 'Start writing...',
             maxHeight: 300,
             showWordCount: true,
-            stickyToolbar: true,
             onChange: (value) => {
                 console.log('Content changed:', value);
-            },
-            initialValue: [
-                { type: 'heading-one', children: [{ text: 'Hello World!' }] },
-                { type: 'paragraph', children: [{ text: 'This is a paragraph.' }] }
-            ]
+            }
         });
+        
+        // Helper function for creating configs
+        const quickConfig = window.BrandNovaEditor.createConfig(['formatting', 'actions']);
+        console.log('Quick config:', quickConfig);
     </script>
 </body>
 </html>
@@ -143,6 +220,12 @@ function App() {
 ```javascript
 // Initialize a new editor instance
 const editor = window.BrandNovaEditor.init(options);
+
+// Create toolbar configuration helper
+const config = window.BrandNovaEditor.createConfig(['formatting', 'headings', 'actions']);
+
+// Access default configuration
+console.log(window.BrandNovaEditor.DEFAULT_TOOLBAR_CONFIG);
 
 // Get existing instance
 const editor = window.BrandNovaEditor.getInstance(elementId);
@@ -172,6 +255,20 @@ editor.destroy();
 const element = editor.getElement();
 ```
 
+### Configuration Helper
+
+```javascript
+// Create configuration with specific groups
+const config = window.BrandNovaEditor.createConfig([
+    'formatting',    // Bold, italic, underline, strikethrough
+    'headings',      // H1, H2, H3, paragraph
+    'alignment',     // Left, center, right, justify
+    'blocks',        // Quote, bulleted list, numbered list
+    'actions',       // Undo, redo
+    'fullscreen'     // Fullscreen toggle
+]);
+```
+
 ## Keyboard Shortcuts
 
 All shortcuts are displayed in tooltips when hovering over toolbar buttons:
@@ -181,6 +278,7 @@ All shortcuts are displayed in tooltips when hovering over toolbar buttons:
 | `Ctrl/Cmd + B` | Bold |
 | `Ctrl/Cmd + I` | Italic |
 | `Ctrl/Cmd + U` | Underline |
+| `Ctrl/Cmd + Shift + S` | Strikethrough |
 | `Ctrl/Cmd + Z` | Undo |
 | `Ctrl/Cmd + Y` / `Ctrl/Cmd + Shift + Z` | Redo |
 | `F11` | Toggle fullscreen |
@@ -222,6 +320,58 @@ function hello() {
 ```
 ```
 
+## Toolbar Configuration Use Cases
+
+### 1. Comment Editor
+Perfect for user comments with minimal formatting needs:
+```javascript
+const commentConfig = {
+    formatting: ['bold', 'italic', 'strikethrough']
+};
+```
+
+### 2. Blog Post Editor
+Comprehensive editor for content creation:
+```javascript
+const blogConfig = {
+    formatting: ['bold', 'italic', 'underline'],
+    headings: ['heading-one', 'heading-two', 'heading-three', 'paragraph'],
+    blocks: ['block-quote', 'bulleted-list', 'numbered-list'],
+    actions: ['undo', 'redo'],
+    fullscreen: ['fullscreen']
+};
+```
+
+### 3. Email Composer
+Professional email formatting tools:
+```javascript
+const emailConfig = {
+    formatting: ['bold', 'italic', 'underline'],
+    alignment: ['left', 'center', 'right'],
+    blocks: ['bulleted-list', 'numbered-list'],
+    actions: ['undo', 'redo']
+};
+```
+
+### 4. Note Taking
+Quick notes with essential formatting:
+```javascript
+const noteConfig = {
+    formatting: ['bold', 'italic'],
+    headings: ['heading-one', 'heading-two', 'paragraph'],
+    actions: ['undo', 'redo']
+};
+```
+
+### 5. Social Media Post
+Simple formatting for social platforms:
+```javascript
+const socialConfig = {
+    formatting: ['bold', 'italic', 'strikethrough'],
+    blocks: ['bulleted-list']
+};
+```
+
 ## Toolbar Features
 
 ### Enhanced Tooltips
@@ -229,6 +379,12 @@ function hello() {
 - Tooltips appear after 500ms delay
 - Theme-aware styling
 - Shows both action name and keyboard shortcut
+
+### Smart Group Rendering
+- **Conditional Groups**: Groups only appear if they contain at least one configured tool
+- **Individual Tool Control**: Each tool can be individually enabled/disabled
+- **Visual Grouping**: Maintains clean visual separation even with partial tool sets
+- **Responsive Layout**: Toolbar adapts to different screen sizes while preserving grouping
 
 ### Button Groups
 - **Text Formatting**: Bold, Italic, Underline, Strikethrough
@@ -268,11 +424,18 @@ function hello() {
 - **Mixed Formatting**: Handles complex nested formatting efficiently
 - **Table Rendering**: Responsive tables with overflow handling
 - **Tooltip System**: Minimal overhead with efficient event handling
+- **Conditional Rendering**: Only renders configured toolbar tools
 - **maxHeight**: Use when dealing with very long documents
 - **stickyToolbar**: Disable for better performance on mobile
 - **onChange**: Debounce external API calls
 
 ## Advanced Features
+
+### Configurable Toolbar System
+- **Full Control**: Choose exactly which tools appear in each editor
+- **Group Preservation**: Visual grouping maintained even with partial tool sets
+- **Easy Configuration**: Simple object-based configuration system
+- **Helper Functions**: Built-in helpers for common configurations
 
 ### Table Editing
 - Paste markdown tables directly
@@ -306,6 +469,22 @@ if (!element) {
 if (!window.BrandNovaEditor) {
     console.error('BrandNovaEditor library not loaded');
 }
+```
+
+### Toolbar configuration not working
+```javascript
+// Ensure fullEditor is set to false
+const editor = window.BrandNovaEditor.init({
+    elementId: 'my-editor',
+    fullEditor: false,  // Required for custom toolbar
+    toolbarConfig: customConfig
+});
+
+// Check configuration format
+const validConfig = {
+    formatting: ['bold', 'italic'],  // Array of tool names
+    headings: ['heading-one', 'paragraph']
+};
 ```
 
 ### Markdown not parsing

@@ -3,257 +3,547 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BrandNovaEditor - Production Example</title>
-    <!-- Include your built CSS and JS files -->
+    <title>Valiux Editor Demo</title>
+    
+    <!-- Include your built CSS file -->
     <link rel="stylesheet" href="./brand-nova-editor-beta.css">
+    
+    <!-- Demo styling -->
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        * {
             margin: 0;
-            padding: 20px;
-            background: #f5f5f5;
+            padding: 0;
+            box-sizing: border-box;
         }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8fafc;
+        }
+        
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
             background: white;
-            padding: 20px;
-            border-radius: 8px;
+            padding: 2rem;
+            border-radius: 12px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        .controls {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 6px;
-            border: 1px solid #e9ecef;
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: #1e293b;
         }
+        
+        .header p {
+            font-size: 1.1rem;
+            color: #64748b;
+        }
+        
+        .demo-section {
+            margin-bottom: 3rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .demo-header {
+            padding: 1.5rem;
+            background: #f1f5f9;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .demo-header h2 {
+            font-size: 1.5rem;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+        
+        .demo-header p {
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+        
+        .demo-content {
+            padding: 1.5rem;
+        }
+        
+        .config-display {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            overflow-x: auto;
+        }
+        
+        .config-display .comment {
+            color: #94a3b8;
+        }
+        
+        .config-display .key {
+            color: #7dd3fc;
+        }
+        
+        .config-display .string {
+            color: #86efac;
+        }
+        
+        .editor-wrapper {
+            margin-bottom: 1rem;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        
         .control-group {
             display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
+            flex-direction: column;
+            gap: 0.5rem;
         }
-        .control-group:last-child {
-            margin-bottom: 0;
+        
+        .control-group label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #374151;
         }
-        label {
-            font-weight: 500;
-            min-width: 120px;
+        
+        .control-group select,
+        .control-group input {
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.9rem;
         }
-        input, select {
-            padding: 6px 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
+        
+        .apply-btn {
+            padding: 0.75rem 1.5rem;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            align-self: flex-end;
         }
-        .demo-section {
-            margin-bottom: 30px;
+        
+        .apply-btn:hover {
+            background: #2563eb;
         }
-        .demo-section h3 {
-            margin-top: 0;
-            margin-bottom: 15px;
-            color: #333;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 5px;
+        
+        .documentation {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .documentation h2 {
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+        
+        .documentation h3 {
+            color: #374151;
+            margin: 1.5rem 0 1rem 0;
+            font-size: 1.3rem;
+        }
+        
+        .documentation p {
+            margin-bottom: 1rem;
+            color: #4b5563;
+        }
+        
+        .config-examples {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .config-example {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .config-example h4 {
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+        
+        .config-example p {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .config-example pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            overflow-x: auto;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .control-group {
+                flex-direction: row;
+                align-items: center;
+                gap: 1rem;
+            }
+            
+            .control-group label {
+                min-width: 100px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>BrandNovaEditor - Production Usage Example</h1>
+        <div class="header">
+            <h1>Valiux Editor Demo</h1>
+            <p>Configurable Rich Text Editor with Customizable Toolbar</p>
+        </div>
         
         <div class="demo-section">
-            <h3>Dynamic Configuration Controls</h3>
-            <div class="controls">
-                <div class="control-group">
-                    <label>Theme:</label>
-                    <select id="themeSelect">
-                        <option value="light">Light</option>
-                        <option value="dark">Dark</option>
-                    </select>
+            <div class="demo-header">
+                <h2>Interactive Demo</h2>
+                <p>Configure the editor settings below and see the changes in real-time</p>
+            </div>
+            
+            <div class="demo-content">
+                <div class="controls">
+                    <div class="control-group">
+                        <label>Editor Mode:</label>
+                        <select id="editorMode">
+                            <option value="full">Full Editor</option>
+                            <option value="basic">Basic Writing</option>
+                            <option value="comment">Comment Editor</option>
+                            <option value="blog">Blog Post</option>
+                            <option value="social">Social Media</option>
+                            <option value="custom">Custom Config</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Theme:</label>
+                        <select id="theme">
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Max Height:</label>
+                        <select id="maxHeight">
+                            <option value="">No Limit</option>
+                            <option value="300">300px</option>
+                            <option value="500">500px</option>
+                            <option value="800">800px</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Word Count:</label>
+                        <input type="checkbox" id="showWordCount" checked>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Sticky Toolbar:</label>
+                        <input type="checkbox" id="stickyToolbar" checked>
+                    </div>
+                    
+                    <button class="apply-btn" onclick="applyConfiguration()">Apply Changes</button>
                 </div>
                 
-                <div class="control-group">
-                    <label>Max Height (px):</label>
-                    <input type="number" id="maxHeightInput" placeholder="e.g., 300" min="100" max="800" step="50">
-                    <button onclick="clearMaxHeight()">Clear</button>
+                <div class="editor-wrapper">
+                    <div id="demo-editor"></div>
                 </div>
                 
-                <div class="control-group">
-                    <label>Placeholder:</label>
-                    <input type="text" id="placeholderInput" value="Start crafting your story here...">
-                </div>
-                
-                <div class="control-group">
-                    <label>Show Word Count:</label>
-                    <input type="checkbox" id="showWordCountCheck" checked>
-                </div>
-                
-                <div class="control-group">
-                    <label>Sticky Toolbar:</label>
-                    <input type="checkbox" id="stickyToolbarCheck" checked>
-                </div>
-                
-                <div class="control-group">
-                    <label>Custom Class:</label>
-                    <input type="text" id="classNameInput" placeholder="e.g., my-custom-editor">
-                </div>
-                
-                <div class="control-group">
-                    <button onclick="updateEditor()">Update Editor</button>
-                    <button onclick="getEditorContent()">Get HTML Content</button>
-                    <button onclick="resetEditor()">Reset</button>
+                <div class="config-display" id="currentConfig">
+                    <span class="comment">// Current Configuration</span>
                 </div>
             </div>
         </div>
+        
+        <div class="documentation">
+            <h2>Configuration Options</h2>
+            
+            <p>The Valiux Editor supports extensive customization through its configurable toolbar system. You can create editors ranging from minimal comment boxes to full-featured content editors.</p>
+            
+            <h3>Editor Modes</h3>
+            <p>The editor operates in two main modes:</p>
+            <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                <li><strong>Full Editor:</strong> Shows all available tools organized in logical groups</li>
+                <li><strong>Partial Editor:</strong> Shows only the tools specified in your custom configuration</li>
+            </ul>
+            
+            <h3>Toolbar Groups</h3>
+            <p>Tools are organized into the following groups:</p>
+            <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                <li><strong>formatting:</strong> bold, italic, underline, strikethrough</li>
+                <li><strong>headings:</strong> heading-one, heading-two, heading-three, paragraph</li>
+                <li><strong>alignment:</strong> left, center, right, justify</li>
+                <li><strong>blocks:</strong> block-quote, bulleted-list, numbered-list</li>
+                <li><strong>actions:</strong> undo, redo</li>
+                <li><strong>fullscreen:</strong> fullscreen</li>
+            </ul>
+            
+            <h3>Common Configuration Examples</h3>
+            
+            <div class="config-examples">
+                <div class="config-example">
+                    <h4>Basic Writing Editor</h4>
+                    <p>Perfect for simple content creation with essential formatting tools</p>
+                    <pre>{
+  formatting: ['bold', 'italic'],
+  headings: ['heading-one', 'heading-two', 'paragraph'],
+  actions: ['undo', 'redo']
+}</pre>
+                </div>
+                
+                <div class="config-example">
+                    <h4>Comment Editor</h4>
+                    <p>Minimal editor for user comments with basic formatting</p>
+                    <pre>{
+  formatting: ['bold', 'italic', 'strikethrough']
+}</pre>
+                </div>
+                
+                <div class="config-example">
+                    <h4>Blog Post Editor</h4>
+                    <p>Comprehensive editor for content creation with full formatting options</p>
+                    <pre>{
+  formatting: ['bold', 'italic', 'underline'],
+  headings: ['heading-one', 'heading-two', 'heading-three', 'paragraph'],
+  blocks: ['block-quote', 'bulleted-list', 'numbered-list'],
+  actions: ['undo', 'redo'],
+  fullscreen: ['fullscreen']
+}</pre>
+                </div>
+                
+                <div class="config-example">
+                    <h4>Social Media Editor</h4>
+                    <p>Simple formatting for social media posts</p>
+                    <pre>{
+  formatting: ['bold', 'italic', 'strikethrough'],
+  blocks: ['bulleted-list']
+}</pre>
+                </div>
+            </div>
+            
+            <h3>Keyboard Shortcuts</h3>
+            <p>The editor supports standard keyboard shortcuts that are displayed in tooltips:</p>
+            <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                <li><strong>Ctrl/Cmd + B:</strong> Bold</li>
+                <li><strong>Ctrl/Cmd + I:</strong> Italic</li>
+                <li><strong>Ctrl/Cmd + U:</strong> Underline</li>
+                <li><strong>Ctrl/Cmd + Shift + S:</strong> Strikethrough</li>
+                <li><strong>Ctrl/Cmd + Z:</strong> Undo</li>
+                <li><strong>Ctrl/Cmd + Y:</strong> Redo</li>
+                <li><strong>F11:</strong> Fullscreen</li>
+            </ul>
+            
+            <h3>Usage in Your Django Templates</h3>
+            <p>After building the standalone version, include it in your Django templates like this:</p>
+            
+            <pre style="background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 6px; overflow-x: auto; margin: 1rem 0;">{% load static %}
+&lt;link rel="stylesheet" href="{% static 'js/brand-nova-editor.css' %}"&gt;
 
-        <div class="demo-section">
-            <h3>Editor Instance</h3>
-            <!-- Method 1: Auto-initialization with data attributes -->
-            <div 
-                id="editor1" 
-                data-brand-nova-editor
-                data-theme="light"
-                data-placeholder="Start crafting your story here..."
-                data-show-word-count="false"
-                data-sticky-toolbar="true"
-            ></div>
+&lt;div id="my-editor" 
+     data-brand-nova-editor
+     data-full-editor="false"
+     data-toolbar-config='{"formatting": ["bold", "italic"], "actions": ["undo", "redo"]}'
+     data-theme="light"
+     data-placeholder="Start writing..."&gt;&lt;/div&gt;
+
+&lt;script src="{% static 'js/brand-nova-editor.js' %}"&gt;&lt;/script&gt;</pre>
         </div>
-
-        <!-- <div class="demo-section">
-            <h3>Manual Initialization Example</h3>
-            <div id="editor2"></div>
-        </div>
-
-        <div id="output"></div> -->
     </div>
 
-    <!-- Include your built JavaScript file -->
+    <!-- Include your built JS file -->
     <script src="./brand-nova-editor.umd.js"></script>
     
+    <!-- Demo JavaScript -->
     <script>
-        // Manual initialization example
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize editor2 manually
-            const editor2Instance = window.BrandNovaEditor.init({
-                elementId: 'editor2',
-                theme: 'dark',
-                placeholder: 'This editor was initialized manually with dark theme...',
-                showWordCount: true,
-                maxHeight: null,
-                stickyToolbar: false,
+        // Configuration presets
+        const presets = {
+            full: {
+                fullEditor: true,
+                toolbarConfig: {}
+            },
+            basic: {
+                fullEditor: false,
+                toolbarConfig: {
+                    formatting: ['bold', 'italic'],
+                    headings: ['heading-one', 'heading-two', 'paragraph'],
+                    actions: ['undo', 'redo']
+                }
+            },
+            comment: {
+                fullEditor: false,
+                toolbarConfig: {
+                    formatting: ['bold', 'italic', 'strikethrough']
+                }
+            },
+            blog: {
+                fullEditor: false,
+                toolbarConfig: {
+                    formatting: ['bold', 'italic', 'underline'],
+                    headings: ['heading-one', 'heading-two', 'heading-three', 'paragraph'],
+                    blocks: ['block-quote', 'bulleted-list', 'numbered-list'],
+                    actions: ['undo', 'redo'],
+                    fullscreen: ['fullscreen']
+                }
+            },
+            social: {
+                fullEditor: false,
+                toolbarConfig: {
+                    formatting: ['bold', 'italic', 'strikethrough'],
+                    blocks: ['bulleted-list']
+                }
+            },
+            custom: {
+                fullEditor: false,
+                toolbarConfig: {
+                    formatting: ['bold', 'italic', 'underline', 'strikethrough'],
+                    headings: ['heading-one', 'heading-two', 'paragraph'],
+                    alignment: ['left', 'center', 'right'],
+                    actions: ['undo', 'redo']
+                }
+            }
+        };
+
+        let currentEditor = null;
+
+        // Initialize the editor with default settings
+        function initEditor(config) {
+            // Destroy existing editor if it exists
+            if (currentEditor && window.BrandNovaEditor) {
+                currentEditor.destroy();
+            }
+            
+            // Get configuration values from UI
+            const theme = document.getElementById('theme').value;
+            const maxHeight = document.getElementById('maxHeight').value;
+            const showWordCount = document.getElementById('showWordCount').checked;
+            const stickyToolbar = document.getElementById('stickyToolbar').checked;
+            
+            // Merge with preset config
+            const editorConfig = {
+                elementId: 'demo-editor',
+                theme: theme,
+                maxHeight: maxHeight ? parseInt(maxHeight) : null,
+                showWordCount: showWordCount,
+                stickyToolbar: stickyToolbar,
+                placeholder: 'Start writing your content...',
                 onChange: (value) => {
-                    console.log('Editor2 content changed:', value);
+                    console.log('Content changed:', value);
                 },
-                initialValue: [
-                    { type: 'heading-one', children: [{ text: 'Welcome to BrandNovaEditor!' }] },
-                    { type: 'paragraph', children: [{ text: 'This is a ' }, { text: 'rich text editor', bold: true }, { text: ' with many features.' }] },
-                    { type: 'bulleted-list', children: [
-                        { type: 'list-item', children: [{ text: 'Real-time markdown parsing' }] },
-                        { type: 'list-item', children: [{ text: 'Keyboard shortcuts' }] },
-                        { type: 'list-item', children: [{ text: 'Fullscreen mode' }] }
-                    ]}
-                ]
+                ...config
+            };
+            
+            // Initialize the editor if the library is available
+            if (window.BrandNovaEditor) {
+                currentEditor = window.BrandNovaEditor.init(editorConfig);
+                updateConfigDisplay(editorConfig);
+            } else {
+                // Library not loaded, show a message
+                document.getElementById('demo-editor').innerHTML = `
+                    <div style="padding: 2rem; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 8px; text-align: center;">
+                        <h3>Editor Preview</h3>
+                        <p>To see the actual editor, uncomment the script tag for brand-nova-editor.js</p>
+                        <p style="font-size: 0.9rem; color: #64748b; margin-top: 1rem;">
+                            Configuration: ${JSON.stringify(editorConfig, null, 2)}
+                        </p>
+                    </div>
+                `;
+                updateConfigDisplay(editorConfig);
+            }
+        }
+
+        // Apply configuration based on selected options
+        function applyConfiguration() {
+            const mode = document.getElementById('editorMode').value;
+            initEditor(presets[mode]);
+        }
+
+        // Update the configuration display
+        function updateConfigDisplay(config) {
+            const configDisplay = document.getElementById('currentConfig');
+            
+            // Format the configuration for display
+            let configHtml = `<span class="comment">// Current Configuration</span><br>`;
+            configHtml += `<span class="key">theme</span>: <span class="string">'${config.theme}'</span>,<br>`;
+            configHtml += `<span class="key">maxHeight</span>: ${config.maxHeight ? config.maxHeight : 'null'},<br>`;
+            configHtml += `<span class="key">showWordCount</span>: ${config.showWordCount},<br>`;
+            configHtml += `<span class="key">stickyToolbar</span>: ${config.stickyToolbar},<br>`;
+            configHtml += `<span class="key">fullEditor</span>: ${config.fullEditor},<br>`;
+            
+            if (!config.fullEditor) {
+                configHtml += `<span class="key">toolbarConfig</span>: {<br>`;
+                for (const [group, tools] of Object.entries(config.toolbarConfig)) {
+                    configHtml += `&nbsp;&nbsp;<span class="key">${group}</span>: [`;
+                    configHtml += tools.map(tool => `<span class="string">'${tool}'</span>`).join(', ');
+                    configHtml += `],<br>`;
+                }
+                configHtml += `}`;
+            }
+            
+            configDisplay.innerHTML = configHtml;
+        }
+
+        // Initialize with default settings when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initEditor(presets.full);
+            
+            // Add event listeners for mode changes
+            document.getElementById('editorMode').addEventListener('change', function() {
+                if (this.value !== 'custom') {
+                    applyConfiguration();
+                }
             });
         });
 
-        // Control functions
-        function updateEditor() {
-            const theme = document.getElementById('themeSelect').value;
-            const maxHeight = document.getElementById('maxHeightInput').value;
-            const placeholder = document.getElementById('placeholderInput').value;
-            const showWordCount = document.getElementById('showWordCountCheck').checked;
-            const stickyToolbar = document.getElementById('stickyToolbarCheck').checked;
-            const className = document.getElementById('classNameInput').value;
-
-            // Update the first editor using data attributes
-            const editor1 = document.getElementById('editor1');
-            editor1.setAttribute('data-theme', theme);
-            editor1.setAttribute('data-placeholder', placeholder);
-            editor1.setAttribute('data-show-word-count', showWordCount.toString());
-            editor1.setAttribute('data-sticky-toolbar', stickyToolbar.toString());
-            
-            if (maxHeight) {
-                editor1.setAttribute('data-max-height', maxHeight);
-            } else {
-                editor1.removeAttribute('data-max-height');
-            }
-            
-            if (className) {
-                editor1.setAttribute('data-class-name', className);
-            } else {
-                editor1.removeAttribute('data-class-name');
-            }
-
-            // Update the manual editor using the API
-            window.BrandNovaEditor.updateProps('editor2', {
-                theme: theme === 'light' ? 'dark' : 'light', // Opposite theme for contrast
-                placeholder: placeholder + ' (Manual Editor)',
-                showWordCount,
-                stickyToolbar,
-                maxHeight: maxHeight ? parseInt(maxHeight) : null,
-                className: className + ' manual-editor'
-            });
-
-            showOutput('Editors updated with new configuration!');
+        // Helper function to create custom configurations
+        function createCustomConfig() {
+            return window.BrandNovaEditor ? 
+                window.BrandNovaEditor.createConfig(['formatting', 'headings', 'actions']) : 
+                { formatting: ['bold', 'italic'], headings: ['heading-one', 'paragraph'], actions: ['undo', 'redo'] };
         }
-
-        function clearMaxHeight() {
-            document.getElementById('maxHeightInput').value = '';
-            updateEditor();
-        }
-
-        function getEditorContent() {
-            const instance1 = window.BrandNovaEditor.getInstance('editor1');
-            const instance2 = window.BrandNovaEditor.getInstance('editor2');
-            const instance3 = window.BrandNovaEditor.getInstance('editor3');
-
-            let output = 'Editor Contents:\n\n';
-            
-            if (instance1) {
-                output += 'Editor 1 (Auto-init):\n' + instance1.getHTML() + '\n\n';
-            }
-            
-            if (instance2) {
-                output += 'Editor 2 (Manual):\n' + instance2.getHTML() + '\n\n';
-            }
-            
-            if (instance3) {
-                output += 'Editor 3 (Fixed Height):\n' + instance3.getHTML() + '\n\n';
-            }
-
-            showOutput(output);
-        }
-
-        function resetEditor() {
-            // Reset all form controls
-            document.getElementById('themeSelect').value = 'light';
-            document.getElementById('maxHeightInput').value = '';
-            document.getElementById('placeholderInput').value = 'Start crafting your story here...';
-            document.getElementById('showWordCountCheck').checked = true;
-            document.getElementById('stickyToolbarCheck').checked = true;
-            document.getElementById('classNameInput').value = '';
-
-            // Reset editors
-            updateEditor();
-            
-            showOutput('Editors reset to default configuration!');
-        }
-
-        function showOutput(content) {
-            const output = document.getElementById('output');
-            output.textContent = content;
-            output.scrollTop = output.scrollHeight;
-        }
-
-        // Demo some advanced usage
-        setTimeout(() => {
-            showOutput('BrandNovaEditor loaded successfully!\n\nTry the controls above to see live prop updates.\nAll editors support:\n- Real-time markdown parsing\n- Keyboard shortcuts (Ctrl+B, Ctrl+I, F11, etc.)\n- Fullscreen mode\n- Responsive design\n- Accessibility features');
-        }, 1000);
-
-        // Show available instances
-        console.log('Available editor instances:', window.BrandNovaEditor.instances);
     </script>
 </body>
 </html>

@@ -11,6 +11,7 @@ const HOTKEYS = {
   "mod+i": "italic",
   "mod+u": "underline",
   "mod+`": "code",
+  "mod+shift+s": "strikethrough", // Added strikethrough shortcut
   "mod+z": "undo",
   "mod+shift+z": "redo",
   "mod+y": "redo",
@@ -19,6 +20,16 @@ const HOTKEYS = {
 
 const LIST_TYPES = ["numbered-list", "bulleted-list"]
 const TEXT_ALIGN_TYPES = ["left", "center", "right", "justify"]
+
+// Default toolbar configuration - all tools available
+const DEFAULT_TOOLBAR_CONFIG = {
+  formatting: ['bold', 'italic', 'underline', 'strikethrough'],
+  headings: ['heading-one', 'heading-two', 'heading-three', 'paragraph'],
+  alignment: ['left', 'center', 'right', 'justify'],
+  blocks: ['block-quote', 'bulleted-list', 'numbered-list'],
+  actions: ['undo', 'redo'],
+  fullscreen: ['fullscreen']
+}
 
 // Enhanced inline formatting parser that handles mixed formats
 const parseInlineFormatting = (text) => {
@@ -250,11 +261,13 @@ const BrandNovaEditor = ({
   initialValue = [{ type: "paragraph", children: [{ text: "" }] }],
   placeholder = "Start writing your content...",
   onChange,
-  theme = "dark",
+  theme = "light",
   showWordCount = true,
   className = "",
   maxHeight = null,
   stickyToolbar = true,
+  fullEditor = true,
+  toolbarConfig = DEFAULT_TOOLBAR_CONFIG,
 }) => {
   const [value, setValue] = useState(initialValue)
   const [wordCount, setWordCount] = useState(0)
@@ -277,6 +290,11 @@ const BrandNovaEditor = ({
 
     return e
   }, [])
+
+  // Determine the effective toolbar configuration
+  const effectiveToolbarConfig = useMemo(() => {
+    return fullEditor ? DEFAULT_TOOLBAR_CONFIG : toolbarConfig
+  }, [fullEditor, toolbarConfig])
 
   // Fullscreen handling
   useEffect(() => {
@@ -405,6 +423,7 @@ const BrandNovaEditor = ({
               isFullscreen={isFullscreen}
               onToggleFullscreen={toggleFullscreen}
               stickyEnabled={shouldUseSticky}
+              toolbarConfig={effectiveToolbarConfig}
             />
           </div>
 

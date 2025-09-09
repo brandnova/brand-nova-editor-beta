@@ -28,7 +28,8 @@ const Toolbar = ({
   isFullscreen = false,
   onToggleFullscreen,
   stickyEnabled = true,
-  className = ""
+  className = "",
+  toolbarConfig = {}
 }) => {
   const editor = useSlate()
 
@@ -76,6 +77,16 @@ const Toolbar = ({
     return false
   }
 
+  // Helper function to check if a tool group should be rendered
+  const shouldRenderGroup = (groupName) => {
+    return toolbarConfig[groupName] && toolbarConfig[groupName].length > 0
+  }
+
+  // Helper function to check if a specific tool should be rendered
+  const shouldRenderTool = (groupName, toolName) => {
+    return toolbarConfig[groupName] && toolbarConfig[groupName].includes(toolName)
+  }
+
   const groupClass = `flex items-center space-x-1 rounded-lg p-1 transition-colors duration-300 ${
     theme === "dark" ? "bg-gray-700/50" : "bg-amber-50"
   }`
@@ -91,178 +102,225 @@ const Toolbar = ({
       {/* Main toolbar container with proper flex wrapping */}
       <div className="flex flex-wrap items-center gap-2">
         {/* 1. Text Formatting */}
-        <div className={groupClass}>
-          <ToolbarButton
-            theme={theme}
-            active={isActive("mark", "bold")}
-            onMouseDown={(event) => handleButtonClick("mark", "bold", event)}
-            title="Bold"
-            shortcut="Ctrl+B"
-          >
-            <Bold className="h-4 w-4" />
-          </ToolbarButton>
-          <ToolbarButton
-            theme={theme}
-            active={isActive("mark", "italic")}
-            onMouseDown={(event) => handleButtonClick("mark", "italic", event)}
-            title="Italic"
-            shortcut="Ctrl+I"
-          >
-            <Italic className="h-4 w-4" />
-          </ToolbarButton>
-          <ToolbarButton
-            theme={theme}
-            active={isActive("mark", "underline")}
-            onMouseDown={(event) => handleButtonClick("mark", "underline", event)}
-            title="Underline"
-            shortcut="Ctrl+U"
-          >
-            <Underline className="h-4 w-4" />
-          </ToolbarButton>
-          <ToolbarButton
-            theme={theme}
-            active={isActive("mark", "strikethrough")}
-            onMouseDown={(event) => handleButtonClick("mark", "strikethrough", event)}
-            title="Strikethrough"
-          >
-            <Strikethrough className="h-4 w-4" />
-          </ToolbarButton>
-        </div>
+        {shouldRenderGroup('formatting') && (
+          <div className={groupClass}>
+            {shouldRenderTool('formatting', 'bold') && (
+              <ToolbarButton
+                theme={theme}
+                active={isActive("mark", "bold")}
+                onMouseDown={(event) => handleButtonClick("mark", "bold", event)}
+                title="Bold"
+                shortcut="Ctrl+B"
+              >
+                <Bold className="h-4 w-4" />
+              </ToolbarButton>
+            )}
+            {shouldRenderTool('formatting', 'italic') && (
+              <ToolbarButton
+                theme={theme}
+                active={isActive("mark", "italic")}
+                onMouseDown={(event) => handleButtonClick("mark", "italic", event)}
+                title="Italic"
+                shortcut="Ctrl+I"
+              >
+                <Italic className="h-4 w-4" />
+              </ToolbarButton>
+            )}
+            {shouldRenderTool('formatting', 'underline') && (
+              <ToolbarButton
+                theme={theme}
+                active={isActive("mark", "underline")}
+                onMouseDown={(event) => handleButtonClick("mark", "underline", event)}
+                title="Underline"
+                shortcut="Ctrl+U"
+              >
+                <Underline className="h-4 w-4" />
+              </ToolbarButton>
+            )}
+            {shouldRenderTool('formatting', 'strikethrough') && (
+              <ToolbarButton
+                theme={theme}
+                active={isActive("mark", "strikethrough")}
+                onMouseDown={(event) => handleButtonClick("mark", "strikethrough", event)}
+                title="Strikethrough"
+                shortcut="Ctrl+Shift+S"
+              >
+                <Strikethrough className="h-4 w-4" />
+              </ToolbarButton>
+            )}
+          </div>
+        )}
 
         {/* 2. Headings */}
-        <div className={groupClass}>
-          <ToolbarButton
-            theme={theme}
-            active={isActive("block", "heading-one")}
-            onMouseDown={(event) => handleButtonClick("block", "heading-one", event)}
-            title="Heading 1"
-          >
-            <Heading1 className="h-4 w-4" />
-          </ToolbarButton>
-          <ToolbarButton
-            theme={theme}
-            active={isActive("block", "heading-two")}
-            onMouseDown={(event) => handleButtonClick("block", "heading-two", event)}
-            title="Heading 2"
-          >
-            <Heading2 className="h-4 w-4" />
-          </ToolbarButton>
-          <ToolbarButton
-            theme={theme}
-            active={isActive("block", "heading-three")}
-            onMouseDown={(event) => handleButtonClick("block", "heading-three", event)}
-            title="Heading 3"
-          >
-            <Heading3 className="h-4 w-4" />
-          </ToolbarButton>
-          <ToolbarButton
-            theme={theme}
-            active={isActive("action", "paragraph")}
-            onMouseDown={(event) => handleButtonClick("action", "paragraph", event)}
-            title="Paragraph Text"
-          >
-            <Type className="h-4 w-4" />
-          </ToolbarButton>
-        </div>
+        {shouldRenderGroup('headings') && (
+          <div className={groupClass}>
+            {shouldRenderTool('headings', 'heading-one') && (
+              <ToolbarButton
+                theme={theme}
+                active={isActive("block", "heading-one")}
+                onMouseDown={(event) => handleButtonClick("block", "heading-one", event)}
+                title="Heading 1"
+              >
+                <Heading1 className="h-4 w-4" />
+              </ToolbarButton>
+            )}
+            {shouldRenderTool('headings', 'heading-two') && (
+              <ToolbarButton
+                theme={theme}
+                active={isActive("block", "heading-two")}
+                onMouseDown={(event) => handleButtonClick("block", "heading-two", event)}
+                title="Heading 2"
+              >
+                <Heading2 className="h-4 w-4" />
+              </ToolbarButton>
+            )}
+            {shouldRenderTool('headings', 'heading-three') && (
+              <ToolbarButton
+                theme={theme}
+                active={isActive("block", "heading-three")}
+                onMouseDown={(event) => handleButtonClick("block", "heading-three", event)}
+                title="Heading 3"
+              >
+                <Heading3 className="h-4 w-4" />
+              </ToolbarButton>
+            )}
+            {shouldRenderTool('headings', 'paragraph') && (
+              <ToolbarButton
+                theme={theme}
+                active={isActive("action", "paragraph")}
+                onMouseDown={(event) => handleButtonClick("action", "paragraph", event)}
+                title="Paragraph Text"
+              >
+                <Type className="h-4 w-4" />
+              </ToolbarButton>
+            )}
+          </div>
+        )}
 
         {/* 3. Alignments */}
-        <div className={groupClass}>
-          <ToolbarButton
-            theme={theme}
-            active={isActive("align", "left")}
-            onMouseDown={(event) => handleButtonClick("align", "left", event)}
-            title="Align Left"
-          >
-            <AlignLeft className="h-4 w-4" />
-          </ToolbarButton>
-          <ToolbarButton
-            theme={theme}
-            active={isActive("align", "center")}
-            onMouseDown={(event) => handleButtonClick("align", "center", event)}
-            title="Align Center"
-          >
-            <AlignCenter className="h-4 w-4" />
-          </ToolbarButton>
-          <ToolbarButton
-            theme={theme}
-            active={isActive("align", "right")}
-            onMouseDown={(event) => handleButtonClick("align", "right", event)}
-            title="Align Right"
-          >
-            <AlignRight className="h-4 w-4" />
-          </ToolbarButton>
-          <ToolbarButton
-            theme={theme}
-            active={isActive("align", "justify")}
-            onMouseDown={(event) => handleButtonClick("align", "justify", event)}
-            title="Align Justify"
-          >
-            <AlignJustify className="h-4 w-4" />
-          </ToolbarButton>
-        </div>
+        {shouldRenderGroup('alignment') && (
+          <div className={groupClass}>
+            {shouldRenderTool('alignment', 'left') && (
+              <ToolbarButton
+                theme={theme}
+                active={isActive("align", "left")}
+                onMouseDown={(event) => handleButtonClick("align", "left", event)}
+                title="Align Left"
+              >
+                <AlignLeft className="h-4 w-4" />
+              </ToolbarButton>
+            )}
+            {shouldRenderTool('alignment', 'center') && (
+              <ToolbarButton
+                theme={theme}
+                active={isActive("align", "center")}
+                onMouseDown={(event) => handleButtonClick("align", "center", event)}
+                title="Align Center"
+              >
+                <AlignCenter className="h-4 w-4" />
+              </ToolbarButton>
+            )}
+            {shouldRenderTool('alignment', 'right') && (
+              <ToolbarButton
+                theme={theme}
+                active={isActive("align", "right")}
+                onMouseDown={(event) => handleButtonClick("align", "right", event)}
+                title="Align Right"
+              >
+                <AlignRight className="h-4 w-4" />
+              </ToolbarButton>
+            )}
+            {shouldRenderTool('alignment', 'justify') && (
+              <ToolbarButton
+                theme={theme}
+                active={isActive("align", "justify")}
+                onMouseDown={(event) => handleButtonClick("align", "justify", event)}
+                title="Align Justify"
+              >
+                <AlignJustify className="h-4 w-4" />
+              </ToolbarButton>
+            )}
+          </div>
+        )}
 
         {/* 4. Lists and Quote */}
-        <div className={groupClass}>
-          <ToolbarButton
-            theme={theme}
-            active={isActive("block", "block-quote")}
-            onMouseDown={(event) => handleButtonClick("block", "block-quote", event)}
-            title="Quote"
-          >
-            <Quote className="h-4 w-4" />
-          </ToolbarButton>
-          <ToolbarButton
-            theme={theme}
-            active={isActive("block", "bulleted-list")}
-            onMouseDown={(event) => handleButtonClick("block", "bulleted-list", event)}
-            title="Bullet List"
-          >
-            <List className="h-4 w-4" />
-          </ToolbarButton>
-          <ToolbarButton
-            theme={theme}
-            active={isActive("block", "numbered-list")}
-            onMouseDown={(event) => handleButtonClick("block", "numbered-list", event)}
-            title="Numbered List"
-          >
-            <ListOrdered className="h-4 w-4" />
-          </ToolbarButton>
-        </div>
+        {shouldRenderGroup('blocks') && (
+          <div className={groupClass}>
+            {shouldRenderTool('blocks', 'block-quote') && (
+              <ToolbarButton
+                theme={theme}
+                active={isActive("block", "block-quote")}
+                onMouseDown={(event) => handleButtonClick("block", "block-quote", event)}
+                title="Quote"
+              >
+                <Quote className="h-4 w-4" />
+              </ToolbarButton>
+            )}
+            {shouldRenderTool('blocks', 'bulleted-list') && (
+              <ToolbarButton
+                theme={theme}
+                active={isActive("block", "bulleted-list")}
+                onMouseDown={(event) => handleButtonClick("block", "bulleted-list", event)}
+                title="Bullet List"
+              >
+                <List className="h-4 w-4" />
+              </ToolbarButton>
+            )}
+            {shouldRenderTool('blocks', 'numbered-list') && (
+              <ToolbarButton
+                theme={theme}
+                active={isActive("block", "numbered-list")}
+                onMouseDown={(event) => handleButtonClick("block", "numbered-list", event)}
+                title="Numbered List"
+              >
+                <ListOrdered className="h-4 w-4" />
+              </ToolbarButton>
+            )}
+          </div>
+        )}
 
         {/* 5. Actions */}
-        <div className={groupClass}>
-          <ToolbarButton
-            theme={theme}
-            active={false}
-            onMouseDown={(event) => handleButtonClick("action", "undo", event)}
-            title="Undo"
-            shortcut="Ctrl+Z"
-          >
-            <Undo className="h-4 w-4" />
-          </ToolbarButton>
-          <ToolbarButton
-            theme={theme}
-            active={false}
-            onMouseDown={(event) => handleButtonClick("action", "redo", event)}
-            title="Redo"
-            shortcut="Ctrl+Y"
-          >
-            <Redo className="h-4 w-4" />
-          </ToolbarButton>
-        </div>
+        {shouldRenderGroup('actions') && (
+          <div className={groupClass}>
+            {shouldRenderTool('actions', 'undo') && (
+              <ToolbarButton
+                theme={theme}
+                active={false}
+                onMouseDown={(event) => handleButtonClick("action", "undo", event)}
+                title="Undo"
+                shortcut="Ctrl+Z"
+              >
+                <Undo className="h-4 w-4" />
+              </ToolbarButton>
+            )}
+            {shouldRenderTool('actions', 'redo') && (
+              <ToolbarButton
+                theme={theme}
+                active={false}
+                onMouseDown={(event) => handleButtonClick("action", "redo", event)}
+                title="Redo"
+                shortcut="Ctrl+Y"
+              >
+                <Redo className="h-4 w-4" />
+              </ToolbarButton>
+            )}
+          </div>
+        )}
 
-        {/* 6. Maximize - Always visible */}
-        <div className={groupClass}>
-          <ToolbarButton
-            theme={theme}
-            active={isActive("action", "fullscreen")}
-            onMouseDown={(event) => handleButtonClick("action", "fullscreen", event)}
-            title="Toggle Fullscreen"
-            shortcut="F11"
-          >
-            {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
-          </ToolbarButton>
-        </div>
+        {/* 6. Fullscreen - Always visible if included in config */}
+        {shouldRenderGroup('fullscreen') && shouldRenderTool('fullscreen', 'fullscreen') && (
+          <div className={groupClass}>
+            <ToolbarButton
+              theme={theme}
+              active={isActive("action", "fullscreen")}
+              onMouseDown={(event) => handleButtonClick("action", "fullscreen", event)}
+              title="Toggle Fullscreen"
+              shortcut="F11"
+            >
+              {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+            </ToolbarButton>
+          </div>
+        )}
       </div>
 
       {/* Screen reader instructions */}
